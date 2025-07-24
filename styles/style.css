@@ -1,0 +1,86 @@
+* {
+    margin: 0px;
+    padding: 0px;
+} 
+
+body {
+    background-color: #B3B3B3;
+}
+
+nav {
+       background-color: #4D70F9;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centraliza os itens */
+    padding: 0 0px;          /* Remove o padding lateral */
+    gap: 80px;               /* Espaço entre logo e menu */
+   
+    margin: 0 auto;          /* Centraliza o nav na página */
+}
+
+
+.logo {
+    margin-top: -20px;
+    margin-left: -300px;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 20px;
+    /* padding-left: 170px; */
+}
+
+.nav-buttons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding: 25px;
+    cursor: pointer;
+    background-color: #FBC028;
+    border-radius: 30px;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s; /* Transição suave */
+    width: 90px;
+    height: 2px;
+}
+
+.nav-buttons:hover {
+    background-color: #0F183C; /* Cor ao passar o mouse */
+    color: #fff;
+    transform: scale(1.05);    /* Efeito de leve aumento */
+}
+
+
+.nav-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-search input[type="text"] {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+}
+
+.nav-search button {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    background-color: #FBC028;
+    color: #0F183C;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.nav-search button:hover {
+    background-color: #0F183C;
+    color: #fff;
+}
+
+a {
+    text-decoration: none;
+    color: inherit; /* Herda a cor do elemento pai */
+}
