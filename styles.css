@@ -1,0 +1,119 @@
+/* Paleta de Cores */
+:root {
+    --saffron: #f6c135;
+    --big-stone: #13183a;
+    --walnut: #704a1c;
+    --storm-gray: #666b84;
+    --cedar: #341f13;
+    --rope: #8d5a1d;
+    --kumera: #7f5e24;
+    --gun-powder: #40435b;
+    --bali-hai: #8495a9;
+    --regent-gray: #7f8aa5;
+}
+
+/* Estilos Globais */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--big-stone);
+    color: var(--bali-hai);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container da Página de Seleção */
+.selection-container {
+    text-align: center;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.logo-large {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    margin-bottom: 2rem;
+}
+
+.selection-title {
+    color: var(--saffron);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.selection-subtitle {
+    font-size: 1.2rem;
+    color: var(--regent-gray);
+    margin-bottom: 3rem;
+}
+
+.selection-options {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap; /* Para telas menores */
+}
+
+/* Cartões de Seleção */
+.selection-card {
+    background-color: var(--gun-powder);
+    border-radius: 10px;
+    padding: 2rem;
+    width: 300px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.selection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.card-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: var(--saffron);
+    color: var(--big-stone);
+    font-size: 2rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    color: var(--bali-hai);
+    font-size: 1.5rem;
+    margin-top: 0;
+}
+
+.card-description {
+    color: var(--regent-gray);
+    text-align: center;
+    flex-grow: 1; /* Para que todos os cartões tenham a mesma altura */
+}
+
+.selection-button {
+    background-color: var(--saffron);
+    color: var(--big-stone);
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1.5rem;
+}
+
+.selection-button:hover {
+    background-color: #e5b026;
+    transform: translateY(-2px);
+}

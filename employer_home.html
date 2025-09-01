@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início | Empregador</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body id="employer-home">
+    <header class="main-header">
+        <div class="logo-container">
+ <img src="imgs/logo.png" alt="Logo do Projeto" class="logo">        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="employer_home.html">Início</a></li>
+                <li><a href="employer_workers.html">Trabalhadores Disponíveis</a></li>
+                <li><a href="employer_contracts.html">Meus Contratos</a></li>
+                <li><a href="employer_messages.html">Mensagens</a></li>
+            </ul>
+        </nav>
+        <div class="search-profile-container">
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar trabalhadores...">
+                <button type="submit">🔍</button>
+            </div>
+            <div class="profile-area">
+                <span class="profile-name">Olá, Empresa!</span>
+                <div class="profile-photo"><img src="imgs/logo_empresa.png" alt="img_empresa"></div>
+            </div>
+        </div>
+    </header>
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1 class="welcome-title">Bem-vindo(a), Nome da Empresa!</h1>
+            <p class="welcome-subtitle">Gerencie seus projetos e encontre os melhores talentos.</p>
+        </section>
+        <section>
+            <h2 class="section-title">Meus Contratos Ativos</h2>
+            <div class="list-container">
+                <div class="card contract-card">
+                    <h3 class="card-title">Desenvolvimento de Aplicativo Mobile</h3>
+                    <p class="card-description">Contrato com o freelancer "João Silva" para criar a versão 1.0 do app.</p>
+                    <div class="card-meta">
+                        <span>Status: Em Andamento</span>
+                        <span>Orçamento: R$ 5.000</span>
+                    </div>
+                    <button class="card-button">Ver Detalhes</button>
+                </div>
+                </div>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bodyId = document.body.id;
+            const navLinks = document.querySelectorAll('.main-nav a');
+            navLinks.forEach(link => {
+                const linkFile = link.getAttribute('href').split('/').pop().replace('.html', '');
+                if (`employer-${linkFile}` === bodyId) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
