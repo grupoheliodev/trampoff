@@ -1,4 +1,6 @@
-/* Paleta de Cores em RGB para uso com RGBA */
+/* ==========================================================================
+   1. Configurações Globais e Variáveis
+   ========================================================================== */
 :root {
     --saffron-rgb: 246, 193, 53;
     --big-stone-rgb: 19, 24, 58;
@@ -12,7 +14,6 @@
     --regent-gray-rgb: 127, 138, 165;
 }
 
-/* Estilos Globais */
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -21,13 +22,20 @@ body {
     color: rgba(var(--bali-hai-rgb), 1);
 }
 
+a {
+    text-decoration: none;
+    text-underline-offset: none;
+}
+
+/* ==========================================================================
+   2. Layout Principal e Cabeçalho
+   ========================================================================== */
 .main-content {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Header */
 .main-header {
     background-color: rgba(var(--big-stone-rgb), 1);
     display: flex;
@@ -35,6 +43,7 @@ body {
     align-items: center;
     padding: 1rem 2rem;
     border-bottom: 2px solid rgba(var(--gun-powder-rgb), 1);
+    flex-wrap: wrap;
 }
 
 .logo-container {
@@ -42,16 +51,17 @@ body {
 }
 
 .logo {
-    height: 250px;
+    height: 150px;
     border-radius: 50%;
 }
 
 .main-nav ul {
     list-style: none;
-    margin: 30px;
+    margin: 0;
     padding: 0;
     display: flex;
     gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .main-nav a {
@@ -70,6 +80,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .search-bar {
@@ -85,6 +96,7 @@ body {
     background: none;
     color: rgba(var(--bali-hai-rgb), 1);
     outline: none;
+    width: 100%;
 }
 
 .search-bar button {
@@ -120,7 +132,10 @@ body {
     object-fit: cover;
 }
 
-/* Seções da Página */
+
+/* ==========================================================================
+   3. Estilos de Seção e Títulos
+   ========================================================================== */
 .welcome-section {
     text-align: center;
     margin-top: 3rem;
@@ -152,7 +167,9 @@ body {
     gap: 1.5rem;
 }
 
-/* Cards de Conteúdo */
+/* ==========================================================================
+   4. Componentes de Card
+   ========================================================================== */
 .card {
     background-color: rgba(var(--gun-powder-rgb), 1);
     border-radius: 8px;
@@ -199,91 +216,40 @@ body {
     transform: translateY(-2px);
 }
 
-/* Estilos para a página de Mensagens */
-.messages-container {
-    display: flex;
-    gap: 1rem;
-    height: 70vh;
-}
-
-.message-list {
-    flex: 1;
-    background-color: rgba(var(--gun-powder-rgb), 1);
-    border-radius: 8px;
-    padding: 1rem;
-    overflow-y: auto;
-}
-
-.chat-box {
-    flex: 2;
-    background-color: rgba(var(--gun-powder-rgb), 1);
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 1rem;
-}
-
-.chat-input {
-    display: flex;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(var(--bali-hai-rgb), 0.2);
-}
-
-.chat-input input {
-    flex-grow: 1;
-    padding: 0.8rem;
-    border-radius: 20px;
-    border: none;
-    background-color: rgba(var(--big-stone-rgb), 1);
-    color: rgba(var(--bali-hai-rgb), 1);
-}
-
-.chat-input button {
-    padding: 0.8rem 1.5rem;
-    border-radius: 20px;
-    border: none;
-    background-color: rgba(var(--saffron-rgb), 1);
-    color: rgba(var(--big-stone-rgb), 1);
-    cursor: pointer;
-}
-
-/* Estilos da página de seleção e cadastro */
+/* ==========================================================================
+   5. Página de Seleção e Registro
+   ========================================================================== */
 .selection-page, .registration-page {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 1rem;
 }
 
-.selection-container {
+.selection-container, .registration-container {
     text-align: center;
     max-width: 800px;
     padding: 2rem;
+    width: 100%;
 }
 
 .logo-large {
-    width: 350px;
-    height: 350px;
+    width: 250px;
+    height: 250px;
     border-radius: 50%;
-    margin-bottom: -5rem;
-    margin-top: -5rem;
+    margin-bottom: -4rem;
+    margin-top: -4rem;
 }
 
 .selection-title {
     color: rgba(var(--saffron-rgb), 1);
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 0.5rem;
 }
 
 .selection-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: rgba(var(--regent-gray-rgb), 1);
     margin-bottom: 3rem;
 }
@@ -299,7 +265,8 @@ body {
     background-color: rgba(var(--gun-powder-rgb), 1);
     border-radius: 10px;
     padding: 2rem;
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
     display: flex;
@@ -313,28 +280,10 @@ body {
 }
 
 .card-icon {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    color: rgba(var(--big-stone-rgb), 1);
-    font-size: 2rem;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 1.5rem;
-}
-
-.card-title {
-    color: rgba(var(--bali-hai-rgb), 1);
-    font-size: 1.5rem;
-    margin-top: 0;
-}
-
-.card-description {
-    color: rgba(var(--regent-gray-rgb), 1);
-    text-align: center;
-    flex-grow: 1;
 }
 
 .selection-button {
@@ -353,9 +302,12 @@ body {
     transform: translateY(-2px);
 }
 
+/* ==========================================================================
+   6. Formulários de Registro e Login
+   ========================================================================== */
 .registration-container {
     background-color: rgba(var(--gun-powder-rgb), 1);
-    padding: 3rem;
+    padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     width: 100%;
@@ -364,16 +316,16 @@ body {
 }
 
 .logo-small {
-    width: 300px;
-    height: 300px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
-    margin-bottom: -5rem;
-    margin-top: -5rem;
+    margin-bottom: -4rem;
+    margin-top: -4rem;
 }
 
 .registration-title {
     color: rgba(var(--saffron-rgb), 1);
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 0.5rem;
 }
 
@@ -410,6 +362,7 @@ body {
     color: rgba(var(--bali-hai-rgb), 1);
     outline: none;
     transition: border-color 0.3s;
+    width: auto;
 }
 
 .form-group input:focus,
@@ -433,7 +386,25 @@ body {
     transform: translateY(-2px);
 }
 
-/* Estilos da página de Perfil */
+.login_paragraph p {
+    color: rgba(var(--regent-gray-rgb), 1);
+}
+
+.login_paragraph a {
+    color: rgba(var(--saffron-rgb), 1);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login_paragraph p:hover {
+    color: rgba(var(--saffron-rgb), 1);
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   7. Página de Perfil
+   ========================================================================== */
 .profile-card {
     padding: 2rem;
     align-items: center;
@@ -522,14 +493,67 @@ body {
     margin-bottom: 1rem;
 }
 
+/* ==========================================================================
+   8. Página de Mensagens
+   ========================================================================== */
+.messages-container {
+    display: flex;
+    gap: 1rem;
+    height: 70vh;
+}
 
-a {
-    text-decoration: none;
-    text-underline-offset: none;
+.message-list {
+    flex: 1;
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.chat-box {
+    flex: 2;
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.chat-input {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--bali-hai-rgb), 0.2);
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 0.8rem;
+    border-radius: 20px;
+    border: none;
+    background-color: rgba(var(--big-stone-rgb), 1);
+    color: rgba(var(--bali-hai-rgb), 1);
+}
+
+.chat-input button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    border: none;
+    background-color: rgba(var(--saffron-rgb), 1);
+    color: rgba(var(--big-stone-rgb), 1);
+    cursor: pointer;
 }
 
 
-/* Estilos para o Modal de Perfil */
+/* ==========================================================================
+   9. Modal de Perfil
+   ========================================================================== */
 .profile-modal {
     display: none;
     position: fixed;
@@ -553,10 +577,10 @@ a {
 
 .profile-modal-content {
     background-color: rgba(var(--gun-powder-rgb), 1);
-    margin: 15% auto;
+    margin: 50% auto;
     padding: 20px;
     border-radius: 8px;
-    width: 80%;
+    width: 90%;
     max-width: 300px;
     position: relative;
     text-align: center;
@@ -564,7 +588,9 @@ a {
 
 .close-button {
     color: rgba(var(--regent-gray-rgb), 1);
-    float: right;
+    position: absolute;
+    top: 10px;
+    right: 15px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -629,19 +655,90 @@ a {
     to { opacity: 0; }
 }
 
+/* ==========================================================================
+   10. Media Queries para Responsividade
+   ========================================================================== */
 
-.login_paragraph p {
-     color: rgba(var(--regent-gray-rgb), 1);
+/* Telas menores que 992px (Tablets) */
+@media (max-width: 992px) {
+    .main-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .main-nav ul {
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .search-profile-container {
+        justify-content: center;
+    }
+
+    .messages-container {
+        flex-direction: column;
+        height: auto;
+    }
 }
 
-.login_paragraph a {
-    color: rgba(var(--saffron-rgb), 1);
-    text-decoration: none;
-    font-weight: bold;
-}
+/* Telas menores que 768px (Celulares) */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
 
-.login_paragraph p:hover {
-    color: rgba(var(--saffron-rgb), 1);
-    text-decoration: underline;
-    font-weight: bold;
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-profile-container {
+        flex-direction: column;
+    }
+
+    .search-bar input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .selection-options {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .selection-card {
+        width: 90%;
+    }
+
+    .logo-large {
+        width: 200px;
+        height: 200px;
+        margin-bottom: -3rem;
+        margin-top: -3rem;
+    }
+
+    .logo-small {
+        width: 150px;
+        height: 150px;
+        margin-bottom: -3rem;
+        margin-top: -3rem;
+    }
+
+    .registration-container {
+        padding: 1.5rem;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
 }
