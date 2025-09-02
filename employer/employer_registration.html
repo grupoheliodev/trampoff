@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro | Empregador</title>
+    <link rel="stylesheet" href="/styles/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="registration-page">
+    <div class="registration-container">
+        <img src="/imgs/logo.png" alt="Logo do Projeto" class="logo-small">
+        <h1 class="registration-title">Cadastro de Empregador</h1>
+        <p class="registration-subtitle">Preencha os dados abaixo para começar a contratar talentos.</p>
+        <form id="employer-registration-form" class="registration-form">
+            <div class="form-group">
+                <label for="company_name">Nome da Empresa</label>
+                <input type="text" id="company_name" name="company_name" required>
+            </div>
+            <div class="form-group">
+                <label for="cnpj">CNPJ</label>
+                <input type="text" id="cnpj" name="cnpj" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Resumo da Empresa</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            <button type="submit" class="registration-button">Cadastrar</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('employer-registration-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            // Aqui você poderia adicionar a lógica para enviar os dados para o backend
+            // e autenticar o usuário.
+
+            // Após o "cadastro", redireciona para a página inicial do empregador
+            window.location.href = 'employer_home.html';
+        });
+    </script>
+</body>
+</html>
