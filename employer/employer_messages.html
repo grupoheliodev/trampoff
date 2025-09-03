@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens | Empregador</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body id="employer-messages">
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="../imgs/logo.png" alt="Logo do Projeto" class="logo">
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="employer_home.html">Início</a></li>
+                <li><a href="employer_workers.html">Trabalhadores Disponíveis</a></li>
+                <li><a href="employer_contracts.html">Meus Contratos</a></li>
+                <li><a href="employer_messages.html">Mensagens</a></li>
+            </ul>
+        </nav>
+        <div class="search-profile-container">
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar mensagens...">
+                <button type="submit">🔍</button>
+            </div>
+           <a href="employer_profile.html" id="profile-link"><div class="profile-area">
+                <span class="profile-name">Olá, Evil Corp!</span>
+                <div class="profile-photo"><img src="../imgs/perfil_employer.png" alt="img_empresa"></div>
+            </div></a>
+        </div>
+    </header>
+    <main class="main-content">
+        <section>
+            <h2 class="section-title">Mensagens</h2>
+            <div class="messages-container">
+                <div class="message-list card">
+                    <h4>Conversas Recentes</h4>
+                </div>
+                <div class="chat-box card">
+                    <div class="chat-messages">
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Escreva sua mensagem...">
+                        <button>Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <div id="profile-modal" class="profile-modal">
+        <div class="profile-modal-content">
+            <span class="close-button">&times;</span>
+            <div class="modal-profile-header">
+                <img src="../imgs/perfil_employer.png" alt="Foto de Perfil" class="modal-profile-photo">
+                <h3 class="modal-profile-name">Evil Corp</h3>
+                <p class="modal-profile-role">Empresa de Tecnologia</p>
+            </div>
+            <ul class="modal-profile-nav">
+                <li><a href="employer_profile.html">Ver Perfil Completo</a></li>
+                <li><a href="#">Configurações da Conta</a></li>
+                <li><a href="../index.html">Sair</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="../js/js.js"></script>
+</body>
+</html>
