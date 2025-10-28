@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Páginas Principais
-import Index from './pages/index.jsx';
+import Index from './pages/Index.jsx';
 
 // Páginas Freelancer
 import FreelancerLogin from './pages/freelancer/freelancer_login.jsx';

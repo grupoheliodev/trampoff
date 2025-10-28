@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Header from '../../components/header';
-import ProfileModal from '../../components/profilemodal';
+import Header from '../../components/Header';
+import ProfileModal from '../../components/ProfileModal';
 
 const EmployerWorkers = () => {
     const { user, logout } = useAuth();
