@@ -2,13 +2,15 @@
   "name": "tramp-off-app",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://grupoheliodev.github.io/trampoff", 
+  "homepage": "https://grupoheliodev.github.io/trampoff",
   "type": "module",
- "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "deploy": "git subtree split --prefix dist main -b gh-pages-temp && git push origin gh-pages-temp:gh-pages --force && git branch -D gh-pages-temp"
-},
+   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,6 +24,7 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "gh-pages": "^6.3.0",
     "vite": "^5.2.0"
   }
 }
