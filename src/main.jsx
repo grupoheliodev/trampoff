@@ -20,3 +20,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </HashRouter>
   </React.StrictMode>
 );
+
+// Registrar service worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        // Registration successful
+        console.log('ServiceWorker registrado com sucesso:', registration.scope);
+      })
+      .catch((err) => {
+        console.warn('Falha ao registrar ServiceWorker:', err);
+      });
+  });
+}
