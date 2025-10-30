@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/imgs/logo.png';
 import freelancerIcon from '../assets/imgs/freelancer_icon.png';
 import employerIcon from '../assets/imgs/employer_icon.png';
+import PWAInstallPrompt from '../components/PWAInstallPrompt';
 
 const Index = () => {
     return (
@@ -26,6 +27,10 @@ const Index = () => {
                         <p className="card-description">Contrate talentos, gerencie contratos e impulsione seus projetos.</p>
                         <Link to="/employer/login" className="selection-button">Entrar como Empregador</Link>
                     </div>
+                </div>
+                {/* PWA install prompt: aparece abaixo das opções de login */}
+                <div className="pwa-install-container">
+                    <PWAInstallPrompt />
                 </div>
             </div>
         </div>
