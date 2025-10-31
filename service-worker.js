@@ -1,10 +1,9 @@
-const CACHE_NAME = 'trampoff-cache-v1';
+const CACHE_NAME = 'trampoff-cache-v2';
 const ASSETS_TO_CACHE = [
   '/trampoff/',
   '/trampoff/index.html',
   '/trampoff/offline.html',
   '/trampoff/logo.png',
-  '/trampoff/src/assets/imgs/logo.png',
   '/trampoff/icons/icon-192.png',
   '/trampoff/icons/icon-512.png'
 ];
