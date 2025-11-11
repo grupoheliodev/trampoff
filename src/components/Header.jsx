@@ -10,6 +10,7 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         { path: '/freelancer/home', label: 'Início' },
         { path: '/freelancer/projects', label: 'Meus Projetos' },
         { path: '/freelancer/jobs', label: 'Trabalhos Disponíveis' },
+        { path: '/freelancer/contracts', label: 'Meus Contratos' },
         { path: '/freelancer/messages', label: 'Mensagens' },
     ] : [
         { path: '/employer/home', label: 'Início' },

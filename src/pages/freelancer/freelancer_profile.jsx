@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
+import { getReviewsForUser, getReviewStatsForUser } from '../../services/api';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 
 const FreelancerProfile = () => {
@@ -10,6 +11,16 @@ const FreelancerProfile = () => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [profilePicture, setProfilePicture] = useState(perfilFreelancer);
+    const [reviews, setReviews] = useState([]);
+    const [reviewStats, setReviewStats] = useState({ count: 0, average: 0 });
+
+    useEffect(() => {
+        let mounted = true;
+        if (!user?.id) return;
+        getReviewsForUser(user?.id).then(list => { if (mounted) setReviews(list || []); }).catch(() => setReviews([]));
+        getReviewStatsForUser(user?.id).then(stats => { if (mounted) setReviewStats(stats || { count: 0, average: 0 }); }).catch(() => setReviewStats({ count:0, average:0 }));
+        return () => { mounted = false };
+    }, [user]);
 
     const handleLogout = () => {
         logout();
@@ -44,6 +55,10 @@ const FreelancerProfile = () => {
                                 <h3 className="profile-name-large">{user?.name || 'Nome do Freelancer'}</h3>
                                 <p className="profile-tagline">Desenvolvedor Front-end | Especialista em UI/UX</p>
                                 <p className="profile-location">São Paulo, Brasil</p>
+                                <div className="rating-summary" style={{ marginTop: 8 }}>
+                                    <strong style={{ fontSize: 18 }}>{reviewStats.count === 0 ? '—' : reviewStats.average.toFixed(1)}</strong>
+                                    <span style={{ marginLeft: 8, color: '#666' }}>{reviewStats.count} avaliações</span>
+                                </div>
                             </div>
                         </div>
                         <div className="profile-details">
@@ -68,6 +83,17 @@ const FreelancerProfile = () => {
                                         <p>Criação de página de alta conversão para startup de tecnologia.</p>
                                     </div>
                                 </div>
+                            </div>
+                            <div className="profile-section-details">
+                                <h4>Avaliações Recebidas</h4>
+                                {reviews.length === 0 && <p>Sem avaliações ainda.</p>}
+                                {reviews.map(r => (
+                                    <div key={r.id} className="review-item">
+                                        <strong>Nota: {r.rating}</strong>
+                                        <p>{r.comment}</p>
+                                        <small>{new Date(r.createdAt).toLocaleDateString()}</small>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                         <button className="card-button">Editar Perfil</button>

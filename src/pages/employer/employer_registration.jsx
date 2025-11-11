@@ -13,13 +13,18 @@ const EmployerRegistration = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const [registrationError, setRegistrationError] = useState('');
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setRegistrationError('');
         try {
             await register({ name: formData.company_name, email: formData.email, password: formData.password, companyName: formData.company_name }, 'contratante');
             navigate('/employer/home');
         } catch (error) {
-            alert('Erro ao cadastrar. Tente novamente.');
+            const msg = error?.message || 'Erro ao cadastrar. Tente novamente.';
+            setRegistrationError(msg);
+            console.error('Erro no cadastro (employer):', error);
         }
     };
 
@@ -47,6 +52,7 @@ const EmployerRegistration = () => {
                         <textarea id="description" name="description" rows="4" onChange={handleChange}></textarea>
                     </div>
                     <button type="submit" className="registration-button">Cadastrar</button>
+                    {registrationError && <p style={{ color: 'red', marginTop: 8 }}>{registrationError}</p>}
                 </form>
                 <Link to="/employer/login" className="login_paragraph"><p>Já tem uma conta? Faça Login</p></Link>
             </div>

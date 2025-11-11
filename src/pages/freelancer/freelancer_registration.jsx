@@ -108,8 +108,11 @@ const FreelancerRegistration = () => {
         }
     };
 
+    const [registrationError, setRegistrationError] = useState('');
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setRegistrationError('');
         // se campo cad preenchido, garantir validade
         if (formData.cad.trim() !== '' && !isValidCpfCnpj(formData.cad)) {
             setCadError('CPF/CNPJ inválido');
@@ -119,7 +122,10 @@ const FreelancerRegistration = () => {
             await register({ name: formData.name, email: formData.email, password: formData.password }, 'freelancer');
             navigate('/freelancer/home');
         } catch (error) {
-            alert('Erro ao cadastrar. Tente novamente.');
+            // Mostrar mensagem de erro mais útil quando disponível
+            const msg = error?.message || 'Erro ao cadastrar. Tente novamente.';
+            setRegistrationError(msg);
+            console.error('Erro no cadastro (freelancer):', error);
         }
     };
 
@@ -162,6 +168,7 @@ const FreelancerRegistration = () => {
                         <input type="url" id="portfolio" name="portfolio" onChange={handleChange} />
                     </div>
                     <button type="submit" className="registration-button" disabled={!!cadError}>Cadastrar</button>
+                    {registrationError && <p style={{ color: 'red', marginTop: 8 }}>{registrationError}</p>}
                 </form>
                  <Link to="/freelancer/login" className="login_paragraph"><p>Já tem uma conta? Faça Login</p></Link>
             </div>

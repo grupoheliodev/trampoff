@@ -1,25 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getContractsForUser, completeContract, createReview, getReviewsForUser } from '../../services/api';
 import ReviewModal from '../../components/ReviewModal';
-import { useEffect } from 'react';
 
-const EmployerContracts = () => {
+const FreelancerContracts = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [contracts, setContracts] = useState([]);
     const [reviewsMap, setReviewsMap] = useState({});
     const [showReviewModal, setShowReviewModal] = useState(false);
-    const [currentReviewTarget, setCurrentReviewTarget] = useState(null); // { contractId, targetUserId }
+    const [currentReviewTarget, setCurrentReviewTarget] = useState(null);
 
     useEffect(() => {
         let mounted = true;
         getContractsForUser(user?.id).then(list => { if (mounted) setContracts(list || []); }).catch(() => setContracts([]));
-        // carregar avaliações para o usuário (mapa por contractId)
         getReviewsForUser(user?.id).then(list => { if (mounted) {
             const map = {};
             (list || []).forEach(r => { if (r.contractId) map[r.contractId] = r; });
@@ -35,8 +33,9 @@ const EmployerContracts = () => {
 
     return (
         <div>
-            <Header userType="employer" username={user?.name} onProfileClick={() => setShowModal(true)} />
-            <ProfileModal show={showModal} onClose={() => setShowModal(false)} userType="employer" username={user?.name} onLogout={handleLogout} />
+            <Header userType="freelancer" username={user?.name} onProfileClick={() => setShowModal(true)} />
+            <ProfileModal show={showModal} onClose={() => setShowModal(false)} userType="freelancer" username={user?.name} onLogout={handleLogout} />
+
             <main className="main-content">
                 <section>
                     <h2 className="section-title">Meus Contratos</h2>
@@ -45,7 +44,7 @@ const EmployerContracts = () => {
                         {contracts.map(c => (
                             <div className="card contract-card" key={c.id}>
                                 <h3 className="card-title">Contrato #{c.id}</h3>
-                                <p className="card-description">Job: {c.jobId} — Freelancer: {c.freelancerId}</p>
+                                <p className="card-description">Job: {c.jobId} — Contratante: {c.employerId}</p>
                                 <div className="card-meta">
                                     <span>Status: {c.status}</span>
                                     <span>Valor: {c.price}</span>
@@ -62,17 +61,18 @@ const EmployerContracts = () => {
                                 {c.status === 'completed' && !reviewsMap[c.id] && (
                                     <>
                                         <button className="card-button" onClick={() => {
-                                            setCurrentReviewTarget({ contractId: c.id, targetUserId: c.freelancerId });
+                                            setCurrentReviewTarget({ contractId: c.id, targetUserId: c.employerId });
                                             setShowReviewModal(true);
-                                        }}>Avaliar Freelancer</button>
+                                        }}>Avaliar Contratante</button>
                                     </>
                                 )}
+
                             </div>
                         ))}
                     </div>
                 </section>
 
-                <ReviewModal show={showReviewModal} onClose={() => setShowReviewModal(false)} title="Avaliar Freelancer" onSubmit={async ({ rating, comment }) => {
+                <ReviewModal show={showReviewModal} onClose={() => setShowReviewModal(false)} title="Avaliar Contratante" onSubmit={async ({ rating, comment }) => {
                     if (!currentReviewTarget) return;
                     try {
                         await createReview({ reviewerId: user.id, targetUserId: currentReviewTarget.targetUserId, contractId: currentReviewTarget.contractId, rating, comment });
@@ -88,4 +88,4 @@ const EmployerContracts = () => {
     );
 };
 
-export default EmployerContracts;
+export default FreelancerContracts;

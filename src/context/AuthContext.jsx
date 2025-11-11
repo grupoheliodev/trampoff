@@ -29,6 +29,27 @@ export function AuthProvider({ children }) {
     setUserType(user.userType);
   };
 
+  const updateUser = (updatedUser) => {
+    if (!updatedUser) return;
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+    if (updatedUser.userType) setUserType(updatedUser.userType);
+    // também sincronizar com lista local de usuários, se existir (modo local)
+    try {
+      const raw = localStorage.getItem('trampoff_users');
+      if (raw) {
+        const users = JSON.parse(raw);
+        const idx = users.findIndex(u => u.id === updatedUser.id || (u.email && updatedUser.email && u.email.toLowerCase() === updatedUser.email.toLowerCase()));
+        if (idx !== -1) {
+          users[idx] = { ...users[idx], ...updatedUser };
+          localStorage.setItem('trampoff_users', JSON.stringify(users));
+        }
+      }
+    } catch (e) {
+      // noop
+    }
+  };
+
   const login = async (email, password) => {
     const data = await apiLogin(email, password);
     handleAuth(data);
@@ -47,7 +68,7 @@ export function AuthProvider({ children }) {
     setUserType(null);
   };
 
-  const value = { user, userType, token, login, register, logout };
+  const value = { user, userType, token, login, register, logout, updateUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

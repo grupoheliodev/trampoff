@@ -1,0 +1,82 @@
+/* Estilos para página premium e barra lateral de anúncios */
+.premium-page {
+  display: flex;
+  gap: 24px;
+  padding: 20px;
+}
+
+.premium-main {
+  flex: 1 1 0;
+  max-width: 980px;
+}
+
+.hero {
+  background: linear-gradient(90deg,#fff,#f7fbff);
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.pricing-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.pricing-card, .payment-card {
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  padding: 18px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(20,30,50,0.04);
+}
+
+.pricing-card h3 { margin: 0 0 8px 0; }
+.price { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
+.pricing-card ul { margin: 0 0 12px 0; padding-left: 18px; }
+
+.primary-btn { background:#1e88e5; color:#fff; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; }
+.primary-btn.large { padding:14px 18px; font-size:1rem; }
+
+.fake-form label { display:block; font-size:0.85rem; margin-top:10px; }
+.fake-form input { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #d8dde6; }
+.two-cols { display:flex; gap:8px; }
+.two-cols > div { flex:1 }
+
+/* Barra lateral de anúncios */
+.ad-sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ad-card {
+  background: linear-gradient(180deg,#fff,#fbfdff);
+  border: 1px solid #e6edf7;
+  padding: 12px;
+  border-radius: 8px;
+}
+.ad-card.small { padding:10px; }
+.ad-card.banner { background:#1e88e5; color:#fff; display:flex; align-items:center; justify-content:center; height:80px; }
+.ad-cta { background:#ff8a00; color:#fff; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; margin-top:8px; }
+.ad-cta.small { background:#0a84ff; padding:6px 8px; }
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .premium-page { flex-direction: column; }
+  .pricing-section { grid-template-columns: 1fr; }
+  .ad-sidebar { width: 100%; flex-direction: row; overflow:auto; }
+  .ad-card { min-width: 200px; }
+}
+
+/* Estilos para os cards de plano nas configurações */
+.plan-options { display:flex; gap:12px; margin-top:12px; }
+.plan-card { flex:1; border:1px solid #e6e9ef; padding:12px; border-radius:8px; background:#fff; box-shadow: 0 1px 4px rgba(15,20,30,0.04); }
+.plan-card h3 { margin:0 0 6px 0 }
+.plan-card p { margin:0 0 10px 0; color:#444 }
+.plan-card .card-button { width:100%; }
+
+.reset-card { margin-top:16px; padding:12px; border-radius:8px; background:#fff; border:1px solid #f2dede; }
+.reset-button { background:#d9534f; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
+.reset-button:hover { opacity:0.95 }
+
