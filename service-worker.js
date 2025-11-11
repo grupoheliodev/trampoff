@@ -1,11 +1,12 @@
-const CACHE_NAME = 'trampoff-cache-v2';
+const CACHE_NAME = 'trampoff-cache-v1';
 const ASSETS_TO_CACHE = [
-  '/trampoff/',
-  '/trampoff/index.html',
-  '/trampoff/offline.html',
-  '/trampoff/logo.png',
-  '/trampoff/icons/icon-192.png',
-  '/trampoff/icons/icon-512.png'
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/logo.png',
+  '/src/assets/imgs/logo.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -46,7 +47,7 @@ self.addEventListener('fetch', (event) => {
         .catch(() => null);
 
       // Prefer cached, fall back to network, then offline page
-      return cached || networked.then(res => res || caches.match('/trampoff/offline.html'));
+      return cached || networked.then(res => res || caches.match('/offline.html'));
     })
   );
 });
