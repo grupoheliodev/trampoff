@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
+import { useConfirm } from '../../components/ConfirmProvider';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 // useAuth already imported above
 
@@ -11,6 +12,7 @@ const FreelancerSettings = () => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [currentPlan, setCurrentPlan] = useState(user?.plan || 'Free');
+    const confirm = useConfirm();
 
     useEffect(() => {
         setCurrentPlan(user?.plan || 'Free');
@@ -37,10 +39,10 @@ const FreelancerSettings = () => {
         setCurrentPlan(plan);
     };
 
-    const confirmAndSavePlan = (plan) => {
+    const confirmAndSavePlan = async (plan) => {
         const prices = { Free: 'R$0,00', Basic: 'R$19,90', Pro: 'R$49,90' };
         const amount = prices[plan] || 'R$0,00';
-        const ok = window.confirm(`Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?`);
+        const ok = await confirm({ title: 'Confirmar compra', message: `Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?` });
         if (!ok) return;
         // simular cobrança
         const processingMsg = `Processando cobrança de ${amount}...`;
@@ -116,8 +118,8 @@ const FreelancerSettings = () => {
         alert('Informações de pagamento salvas (visual).');
     };
 
-    const clearLocalData = () => {
-        const confirmed = window.confirm('Confirma limpar todos os dados locais? Isso removerá usuários e mensagens salvos e fará logout.');
+    const clearLocalData = async () => {
+        const confirmed = await confirm({ title: 'Confirmar limpeza', message: 'Confirma limpar todos os dados locais? Isso removerá usuários e mensagens salvos e fará logout.' });
         if (!confirmed) return;
         try {
             localStorage.removeItem('trampoff_users');
@@ -196,8 +198,8 @@ const FreelancerSettings = () => {
                                     return arr.map((c) => (
                                         <div className="payment-method" key={c.id}>
                                             <span>{c.brand} **** **** **** {c.last4}</span>
-                                            <button className="remove-button" onClick={() => {
-                                                const r = window.confirm('Remover este cartão?');
+                                            <button className="remove-button" onClick={async () => {
+                                                const r = await confirm({ title: 'Remover cartão', message: 'Remover este cartão?' });
                                                 if (!r) return;
                                                 const raw2 = localStorage.getItem('trampoff_payment_methods');
                                                 const pm2 = raw2 ? JSON.parse(raw2) : {};

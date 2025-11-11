@@ -4,11 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getContractsForUser, completeContract, createReview, getReviewsForUser } from '../../services/api';
+import { useConfirm } from '../../components/ConfirmProvider';
 import ReviewModal from '../../components/ReviewModal';
 import { useEffect } from 'react';
 
 const EmployerContracts = () => {
     const { user, logout } = useAuth();
+    const confirm = useConfirm();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [contracts, setContracts] = useState([]);
@@ -50,8 +52,8 @@ const EmployerContracts = () => {
                                     <span>Status: {c.status}</span>
                                     <span>Valor: {c.price}</span>
                                 </div>
-                                {c.status !== 'completed' && <button className="card-button" onClick={() => {
-                                    const ok = window.confirm('Marcar contrato como concluído?');
+                                {c.status !== 'completed' && <button className="card-button" onClick={async () => {
+                                    const ok = await confirm({ title: 'Confirmar', message: 'Marcar contrato como concluído?' });
                                     if (!ok) return;
                                     completeContract(c.id).then(updated => {
                                         setContracts(prev => prev.map(it => it.id === updated.id ? updated : it));

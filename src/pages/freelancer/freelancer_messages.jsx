@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getUsers, getMessages, sendMessage } from '../../services/api';
+import perfilEmployer from '../../assets/imgs/perfil_employer.png';
 
 const FreelancerMessages = () => {
     const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ const FreelancerMessages = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const messagesRef = useRef(null);
 
     useEffect(() => {
         // carregar lista de employers do backend local
@@ -34,6 +36,11 @@ const FreelancerMessages = () => {
         });
         return () => { mounted = false };
     }, [selectedUser, user.id]);
+
+    useEffect(() => {
+        const el = messagesRef.current;
+        if (el) setTimeout(() => { el.scrollTop = el.scrollHeight; }, 50);
+    }, [messages]);
 
     const handleSendMessage = () => {
         if (!newMessage.trim() || !selectedUser) return;
@@ -70,9 +77,13 @@ const FreelancerMessages = () => {
                                     <li
                                         key={u.id}
                                         onClick={() => setSelectedUser(u)}
-                                        className={selectedUser?.id === u.id ? 'selected' : ''}
+                                        className={selectedUser?.id === u.id ? 'selected user-list-item' : 'user-list-item'}
                                     >
-                                        {u.name || u.email}
+                                        <div className="user-avatar"><img src={u.photo || perfilEmployer} alt="avatar" /></div>
+                                        <div className="user-info">
+                                            <div className="user-name">{u.name || u.email}</div>
+                                            <div className="user-sub">{u.companyName || ''}</div>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
@@ -80,12 +91,20 @@ const FreelancerMessages = () => {
                         <div className="chat-box card">
                             {selectedUser ? (
                                 <>
-                                    <h4>Conversa com {selectedUser.nome}</h4>
-                                    <div className="chat-messages">
+                                    <h4>Conversa com {selectedUser.name || selectedUser.email}</h4>
+                                    <div className="chat-messages" ref={messagesRef}>
                                         {messages.map((msg) => (
                                             <div key={msg.id} className={`message ${msg.senderId === user.id ? 'sent' : 'received'}`}>
-                                                <p>{msg.content}</p>
-                                                <small>{new Date(msg.createdAt || (msg.timestamp && msg.timestamp.seconds * 1000) || Date.now()).toLocaleString()}</small>
+                                                {msg.senderId !== user.id && (
+                                                    <div className="message-avatar"><img src={selectedUser.photo || perfilEmployer} alt="avatar" /></div>
+                                                )}
+                                                <div className="message-content">
+                                                    <p>{msg.content}</p>
+                                                    <small>{new Date(msg.createdAt || (msg.timestamp && msg.timestamp.seconds * 1000) || Date.now()).toLocaleString()}</small>
+                                                </div>
+                                                {msg.senderId === user.id && (
+                                                    <div className="message-avatar"><img src={user?.photo || perfilEmployer} alt="avatar" /></div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

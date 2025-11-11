@@ -8,6 +8,52 @@
 */
 
 /*
+  Integração opcional com backend relacional (login) e Firebase (Firestore)
+  ---
+  Nota: para manter o aplicativo rodando localmente por enquanto, o código
+  de integração fica comentado abaixo. Quando quiser ativar:
+
+  1) Adicione as variáveis no `.env` (Vite):
+     VITE_RELATIONAL_API_URL=https://seu-backend-relacional.example.com/api
+     VITE_FIREBASE_API_KEY=...
+     VITE_FIREBASE_AUTH_DOMAIN=...
+     VITE_FIREBASE_PROJECT_ID=...
+     VITE_FIREBASE_STORAGE_BUCKET=...
+     VITE_FIREBASE_MESSAGING_SENDER_ID=...
+     VITE_FIREBASE_APP_ID=...
+
+  2) Instale a dependência `firebase` e remova o comentário nas linhas
+     abaixo para inicializar o Firestore.
+
+  // import { initializeApp } from 'firebase/app';
+  // import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from 'firebase/firestore';
+
+  // const RELATIONAL_URL = import.meta.env.VITE_RELATIONAL_API_URL || '';
+  // const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY || '';
+
+  // let db = null;
+  // if (FIREBASE_API_KEY) {
+  //   const firebaseConfig = {
+  //     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  //     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  //     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  //     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  //     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  //     appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  //   };
+  //   try {
+  //     const app = initializeApp(firebaseConfig);
+  //     db = getFirestore(app);
+  //     console.info('[firebase] Firestore inicializado');
+  //   } catch (e) {
+  //     console.warn('[firebase] falha ao inicializar Firestore', e);
+  //     db = null;
+  //   }
+  // }
+
+*/
+
+/*
   Código de conexão com backend (comentado).
   Mantido aqui comentado para facilitar voltar ao modo remoto quando necessário.
 
@@ -175,6 +221,7 @@ export const register = async (userData, userType) => {
 };
 
 export const login = async (email, password) => {
+  // Local authentication (default) — permanece até integrar o backend relacional.
   await sleep(100);
   const users = loadUsers();
   const found = users.find(u => (u.email || '').toLowerCase() === (email || '').toLowerCase() && u.password === password);

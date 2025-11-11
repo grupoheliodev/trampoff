@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
+import { useConfirm } from '../../components/ConfirmProvider';
 import perfilEmployer from '../../assets/imgs/perfil_employer.png';
 // useEffect imported above
 
@@ -11,6 +12,7 @@ const EmployerSettings = () => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [currentPlan, setCurrentPlan] = useState(user?.plan || 'Free');
+    const confirm = useConfirm();
 
     useEffect(() => {
         setCurrentPlan(user?.plan || 'Free');
@@ -52,10 +54,10 @@ const EmployerSettings = () => {
         setCurrentPlan(plan);
     };
 
-    const confirmAndSavePlan = (plan) => {
+    const confirmAndSavePlan = async (plan) => {
         const prices = { Free: 'R$0,00', Basic: 'R$29,90', Pro: 'R$79,90' };
         const amount = prices[plan] || 'R$0,00';
-        const ok = window.confirm(`Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?`);
+        const ok = await confirm({ title: 'Confirmar compra', message: `Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?` });
         if (!ok) return;
         alert(`Processando cobrança de ${amount}...`);
         setTimeout(() => {
@@ -125,8 +127,8 @@ const EmployerSettings = () => {
         alert('Informações de pagamento salvas (visual).');
     };
 
-    const clearLocalData = () => {
-        const confirmed = window.confirm('Confirma limpar todos os dados locais? Isso removerá usuários e mensagens salvos e fará logout.');
+    const clearLocalData = async () => {
+        const confirmed = await confirm({ title: 'Confirmar limpeza', message: 'Confirma limpar todos os dados locais? Isso removerá usuários e mensagens salvos e fará logout.' });
         if (!confirmed) return;
         try {
             localStorage.removeItem('trampoff_users');
