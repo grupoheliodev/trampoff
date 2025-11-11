@@ -1,11 +1,13 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/imgs/logo.png';
 import perfilFreelancer from '../assets/imgs/perfil_freelancer.png';
 import perfilEmployer from '../assets/imgs/perfil_employer.png';
 
 const Header = ({ userType, username, onProfileClick, profilePicture }) => {
-    const isFreelancer = userType === 'freelancer';
+    const { user } = useAuth();
+    const isFreelancer = userType === 'freelancer' || (user && user.userType === 'freelancer');
     const navLinks = isFreelancer ? [
         { path: '/freelancer/home', label: 'Início' },
         { path: '/freelancer/projects', label: 'Meus Projetos' },
@@ -19,7 +21,7 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         { path: '/employer/messages', label: 'Mensagens' },
     ];
     
-    const profileImg = profilePicture || (isFreelancer ? perfilFreelancer : perfilEmployer);
+    const profileImg = profilePicture || user?.photo || (isFreelancer ? perfilFreelancer : perfilEmployer);
 
     return (
         <header className="main-header">

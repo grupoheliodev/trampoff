@@ -48,6 +48,12 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // noop
     }
+    // Dispatch an event so other parts of the app (e.g. lists) can refresh
+    try {
+      window.dispatchEvent(new CustomEvent('trampoff:users-updated', { detail: { user: updatedUser } }));
+    } catch (e) {
+      // ignore in non-browser envs
+    }
   };
 
   const login = async (email, password) => {

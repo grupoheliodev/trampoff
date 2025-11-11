@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { useConfirm } from '../../components/ConfirmProvider';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
+import CardForm from '../../components/CardForm';
 // useAuth already imported above
 
 const FreelancerSettings = () => {
@@ -59,16 +60,18 @@ const FreelancerSettings = () => {
     const [fullName, setFullName] = useState(user?.name || '');
     const [tagline, setTagline] = useState('Desenvolvedor Front-end | Especialista em UI/UX');
     const [location, setLocation] = useState('São Paulo, Brasil');
+    const [profilePhoto, setProfilePhoto] = useState(user?.photo || perfilFreelancer);
 
     const [billingAddress, setBillingAddress] = useState('');
 
     useEffect(() => {
         setFullName(user?.name || '');
+        setProfilePhoto(user?.photo || perfilFreelancer);
     }, [user]);
 
     const handleSaveProfile = (e) => {
         e.preventDefault();
-        const updated = { ...user, name: fullName, tagline, location };
+        const updated = { ...user, name: fullName, tagline, location, photo: profilePhoto };
         // salvar em trampoff_users
         try {
             const raw = localStorage.getItem('trampoff_users');
@@ -86,16 +89,33 @@ const FreelancerSettings = () => {
     };
 
     // Payment methods
-    const addPaymentMethod = () => {
-        const card = window.prompt('Digite os 4 últimos dígitos do cartão (ex: 1234):');
-        if (!card) return;
+    const [paymentMethods, setPaymentMethods] = useState([]);
+    const [showAddCard, setShowAddCard] = useState(false);
+
+    useEffect(() => {
         try {
             const raw = localStorage.getItem('trampoff_payment_methods');
             const pm = raw ? JSON.parse(raw) : {};
-            const arr = pm[user?.id] || [];
-            arr.push({ id: Date.now(), last4: card, brand: 'Visa' });
+            setPaymentMethods(pm[user?.id] || []);
+        } catch (e) { setPaymentMethods([]); }
+    }, [user?.id]);
+
+    const savePaymentMethods = (arr) => {
+        try {
+            const raw = localStorage.getItem('trampoff_payment_methods');
+            const pm = raw ? JSON.parse(raw) : {};
             pm[user?.id] = arr;
             localStorage.setItem('trampoff_payment_methods', JSON.stringify(pm));
+            setPaymentMethods(arr);
+        } catch (e) { console.error('savePaymentMethods', e); }
+    };
+
+    const addPaymentMethod = (card) => {
+        try {
+            const arr = [...(paymentMethods || [])];
+            arr.push(card);
+            savePaymentMethods(arr);
+            setShowAddCard(false);
             alert('Cartão adicionado (visual).');
         } catch (e) { console.error(e); alert('Falha ao adicionar cartão'); }
     };
@@ -153,18 +173,19 @@ const FreelancerSettings = () => {
                         <div className="form-group profile-picture-upload">
                             <label>Foto de Perfil</label>
                             <div className="picture-preview">
-                                <img src={perfilFreelancer} alt="Foto de Perfil Atual" className="modal-profile-photo" />
-                                <input type="file" id="photo-upload" accept="image/*" onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
+                                <img src={profilePhoto} alt="Foto de Perfil Atual" className="modal-profile-photo" />
+                                <input
+                                    type="file"
+                                    id="photo-upload"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files && e.target.files[0];
+                                        if (!file) return;
                                         const reader = new FileReader();
-                                        reader.onload = (event) => {
-                                            const img = document.querySelector('.modal-profile-photo');
-                                            if (img) img.src = event.target.result;
-                                        };
+                                        reader.onload = (event) => setProfilePhoto(event.target.result);
                                         reader.readAsDataURL(file);
-                                    }
-                                }} />
+                                    }}
+                                />
                                 <label htmlFor="photo-upload" className="card-button upload-button">Alterar Foto</label>
                             </div>
                         </div>
@@ -189,30 +210,25 @@ const FreelancerSettings = () => {
                     <div className="form-group">
                         <label>Métodos de Pagamento Salvos</label>
                         <div className="payment-method-list">
-                            {/* listar métodos salvos do localStorage */}
-                            {(() => {
-                                try {
-                                    const raw = localStorage.getItem('trampoff_payment_methods');
-                                    const pm = raw ? JSON.parse(raw) : {};
-                                    const arr = pm[user?.id] || [];
-                                    return arr.map((c) => (
-                                        <div className="payment-method" key={c.id}>
-                                            <span>{c.brand} **** **** **** {c.last4}</span>
-                                            <button className="remove-button" onClick={async () => {
-                                                const r = await confirm({ title: 'Remover cartão', message: 'Remover este cartão?' });
-                                                if (!r) return;
-                                                const raw2 = localStorage.getItem('trampoff_payment_methods');
-                                                const pm2 = raw2 ? JSON.parse(raw2) : {};
-                                                pm2[user?.id] = (pm2[user?.id] || []).filter(x => x.id !== c.id);
-                                                localStorage.setItem('trampoff_payment_methods', JSON.stringify(pm2));
-                                                alert('Cartão removido (visual).');
-                                            }}>Remover</button>
-                                        </div>
-                                    ));
-                                } catch (e) { return null }
-                            })()}
+                            {paymentMethods.length === 0 && <div className="payment-method">Nenhum cartão salvo.</div>}
+                            {paymentMethods.map((c) => (
+                                <div className="payment-method" key={c.id}>
+                                    <span>{(c.brand || '').toUpperCase()} **** **** **** {c.last4} — {c.holder || ''} <small style={{color:'var(--text-medium)'}}>({c.expiry})</small></span>
+                                    <button className="remove-button" onClick={async () => {
+                                        const confirmed = await confirm({ title: 'Remover cartão', message: 'Remover este cartão salvo?' });
+                                        if (!confirmed) return;
+                                        const remaining = paymentMethods.filter(x => x.id !== c.id);
+                                        savePaymentMethods(remaining);
+                                    }}>Remover</button>
+                                </div>
+                            ))}
                         </div>
-                        <button type="button" className="card-button" onClick={addPaymentMethod}>Adicionar Novo Cartão</button>
+                        {!showAddCard && <button className="card-button" type="button" onClick={() => setShowAddCard(true)}>Adicionar Novo Cartão</button>}
+                        {showAddCard && (
+                            <div style={{marginTop:12}}>
+                                <CardForm onAdd={addPaymentMethod} onCancel={() => setShowAddCard(false)} />
+                            </div>
+                        )}
                     </div>
                     <form className="settings-form" onSubmit={handleSavePayment}>
                         <div className="form-group">
@@ -227,20 +243,58 @@ const FreelancerSettings = () => {
                     <h2 className="settings-title">Seu Plano</h2>
                     <p>Plano atual: <strong>{currentPlan}</strong></p>
                     <div className="plan-options">
-                        <div className="plan-card">
-                            <h3>Free</h3>
-                            <p>Recursos básicos, grátis.</p>
-                            <button className="card-button" onClick={() => confirmAndSavePlan('Free')}>Selecionar Free</button>
+                        <div className={`plan-card ${currentPlan === 'Free' ? 'active-plan' : ''}`}>
+                            <div>
+                                <h3>Free</h3>
+                                <p>Recursos básicos, grátis.</p>
+                            </div>
+                            <div>
+                                <button
+                                    className="card-button"
+                                    onClick={() => confirmAndSavePlan('Free')}
+                                    disabled={currentPlan === 'Free'}
+                                    aria-disabled={currentPlan === 'Free'}
+                                    title={currentPlan === 'Free' ? 'Plano atualmente ativo' : 'Selecionar Free'}
+                                >
+                                    {currentPlan === 'Free' ? 'Ativo' : 'Selecionar Free'}
+                                </button>
+                            </div>
                         </div>
-                        <div className="plan-card">
-                            <h3>Basic</h3>
-                            <p>Destaque simples no fluxo — R$19,90/mês (visual)</p>
-                            <button className="card-button" onClick={() => confirmAndSavePlan('Basic')}>Ativar Basic</button>
+
+                        <div className={`plan-card ${currentPlan === 'Basic' ? 'active-plan' : ''}`}>
+                            <div>
+                                <h3>Basic</h3>
+                                <p>Destaque simples no fluxo — R$19,90/mês (visual)</p>
+                            </div>
+                            <div>
+                                <button
+                                    className="card-button"
+                                    onClick={() => confirmAndSavePlan('Basic')}
+                                    disabled={currentPlan === 'Basic'}
+                                    aria-disabled={currentPlan === 'Basic'}
+                                    title={currentPlan === 'Basic' ? 'Plano atualmente ativo' : 'Ativar Basic'}
+                                >
+                                    {currentPlan === 'Basic' ? 'Ativo' : 'Ativar Basic'}
+                                </button>
+                            </div>
                         </div>
-                        <div className="plan-card">
-                            <h3>Pro</h3>
-                            <p>Recursos avançados e prioridade — R$49,90/mês (visual)</p>
-                            <button className="card-button" onClick={() => confirmAndSavePlan('Pro')}>Ativar Pro</button>
+
+                        <div className={`plan-card ${currentPlan === 'Pro' ? 'active-plan' : ''}`}>
+                            <div>
+                                <h3>Pro</h3>
+                                <p>Recursos avançados e prioridade — R$49,90/mês (visual)</p>
+                            </div>
+                            <div>
+                                <button
+                                    className="card-button"
+                                    onClick={() => confirmAndSavePlan('Pro')}
+                                    disabled={currentPlan === 'Pro'}
+                                    aria-disabled={currentPlan === 'Pro'}
+                                    title={currentPlan === 'Pro' ? 'Plano atualmente ativo' : 'Ativar Pro'}
+                                >
+                                    {currentPlan === 'Pro' ? 'Ativo' : 'Ativar Pro'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

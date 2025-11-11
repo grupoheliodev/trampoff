@@ -61,6 +61,17 @@
 .ad-cta { background:#ff8a00; color:#fff; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; margin-top:8px; }
 .ad-cta.small { background:#0a84ff; padding:6px 8px; }
 
+/* Payment form styles */
+.payment-method-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+.payment-method { display:flex; justify-content:space-between; align-items:center; gap:12px; background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); }
+.card-form { background: linear-gradient(145deg, rgba(0,0,0,0.06), rgba(255,255,255,0.02)); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); }
+.card-input { width:100%; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:var(--text-light); }
+.card-brand { font-weight:800; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.03); }
+.card-brand.visa { background: linear-gradient(90deg,#1a6fb3,#2aa0f6); color:white }
+.card-brand.mastercard { background: linear-gradient(90deg,#ff6b4a,#ffb64a); color:white }
+.card-brand.amex { background: linear-gradient(90deg,#2b9a78,#6be3b8); color:white }
+.card-brand.discover { background: linear-gradient(90deg,#8b6ef8,#d18bff); color:white }
+
 /* Responsivo */
 @media (max-width: 900px) {
   .premium-page { flex-direction: column; }
@@ -71,10 +82,20 @@
 
 /* Estilos para os cards de plano nas configurações */
 .plan-options { display:flex; gap:12px; margin-top:12px; }
-.plan-card { flex:1; border:1px solid #e6e9ef; padding:12px; border-radius:8px; background:#fff; box-shadow: 0 1px 4px rgba(15,20,30,0.04); }
-.plan-card h3 { margin:0 0 6px 0 }
-.plan-card p { margin:0 0 10px 0; color:#444 }
+.plan-card { flex:1; padding:14px; border-radius:10px; background: linear-gradient(145deg, var(--gun-powder), #313641); border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 26px rgba(0,0,0,0.45); color: var(--text-light);
+  display:flex; flex-direction:column; justify-content:space-between; min-height: 200px;
+}
+.plan-card h3 { margin:0 0 6px 0; color: var(--saffron); }
+.plan-card p { margin:0 0 12px 0; color: var(--text-medium); }
 .plan-card .card-button { width:100%; }
+.plan-card .card-button[disabled], .plan-card .card-button[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  box-shadow: none;
+}
+
+.plan-card.active-plan { border-color: rgba(246,193,53,0.7); box-shadow: 0 10px 30px rgba(246,193,53,0.06); }
 
 .reset-card { margin-top:16px; padding:12px; border-radius:8px; background:#fff; border:1px solid #f2dede; }
 .reset-button { background:#d9534f; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }

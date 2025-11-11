@@ -23,7 +23,17 @@ const EmployerMessages = () => {
         getUsers('freelancer').then(list => {
             if (mounted) setUsers(list || []);
         }).catch(() => setUsers([]));
-        return () => { mounted = false };
+        const onUsersUpdated = () => {
+            getUsers('freelancer').then(list => {
+                setUsers(list || []);
+                if (selectedUser) {
+                    const updated = (list || []).find(u => u.id === selectedUser.id);
+                    if (updated) setSelectedUser(updated);
+                }
+            }).catch(() => {});
+        };
+        window.addEventListener('trampoff:users-updated', onUsersUpdated);
+        return () => { mounted = false; window.removeEventListener('trampoff:users-updated', onUsersUpdated); };
     }, []);
 
     useEffect(() => {
