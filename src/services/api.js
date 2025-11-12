@@ -54,95 +54,56 @@
 */
 
 /*
-  Código de conexão com backend (comentado).
-  Mantido aqui comentado para facilitar voltar ao modo remoto quando necessário.
+  Código de conexão com backend (ativo quando VITE_RELATIONAL_API_URL estiver definido).
+  Mantemos o fallback local (localStorage) quando a variável não está presente,
+  permitindo rodar o app sem backend durante desenvolvimento.
+*/
 
-  Exemplo de implementação original que realizava fetch para um API_URL:
+const API_URL = import.meta.env.VITE_RELATIONAL_API_URL || '';
 
-  const API_URL = 'http://localhost:3000/api';
+async function request(endpoint, options = {}) {
+  const { method = 'GET', body = null, headers = {} } = options;
 
-  async function request(endpoint, options = {}) {
-    const { method = 'GET', body = null, headers = {} } = options;
-
-    const config = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-    };
-
-    if (body) {
-      config.body = JSON.stringify(body);
-    }
-
-    try {
-      const response = await fetch(`${API_URL}${endpoint}`, config);
-      // tentar parsear JSON, mas proteger caso backend retorne vazio ou não-JSON
-      let data = null;
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        data = { message: text };
-      }
-
-      if (!response.ok) {
-        // priorizar campos de erro comuns
-        const errMsg = data.error || data.message || data.msg || `Erro ${response.status}`;
-        const err = new Error(errMsg);
-        err.status = response.status;
-        throw err;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('API request error:', error);
-      throw error;
-    }
+  if (!API_URL) {
+    throw new Error('API_URL não definido');
   }
 
-  // Exports originais (uso via request):
-  export const login = (email, password) => {
-    return request('/login', {
-      method: 'POST',
-      body: { email, password },
-    });
+  const config = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
   };
 
-  export const register = (userData, userType) => {
-    // Mapear nomes de rota caso o backend use termos diferentes
-    let endpointType = userType;
-    if (userType === 'contratante') endpointType = 'employer';
-    if (userType === 'freelancer') endpointType = 'freelancer';
+  if (body) {
+    config.body = JSON.stringify(body);
+  }
 
-    return request(`/register/${endpointType}`, {
-      method: 'POST',
-      body: userData,
-    });
-  };
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, config);
+    let data = null;
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      data = { message: text };
+    }
 
-  export const getStatus = () => {
-    return request('/status');
-  };
+    if (!response.ok) {
+      const errMsg = data.error || data.message || data.msg || `Erro ${response.status}`;
+      const err = new Error(errMsg);
+      err.status = response.status;
+      throw err;
+    }
 
-  export const sendMessage = (senderId, receiverId, content) => {
-    return request('/messages', {
-      method: 'POST',
-      body: { senderId, receiverId, content },
-    });
-  };
-
-  export const getMessages = (senderId, receiverId) => {
-    return request(`/messages/${senderId}/${receiverId}`);
-  };
-
-  export const getUsers = (userType) => {
-    return request(`/users/${userType}`);
-  };
-
-*/
+    return data;
+  } catch (error) {
+    console.error('API request error:', error);
+    throw error;
+  }
+}
 
 const USERS_KEY = 'trampoff_users';
 const MESSAGES_KEY = 'trampoff_messages';
@@ -185,7 +146,19 @@ const normalizeType = (t) => {
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
 
 export const register = async (userData, userType) => {
-  // simular latência
+  // If an API URL is configured, call the backend; otherwise use localStorage fallback
+  if (API_URL) {
+    // Map frontend userType to backend expected wording
+    let endpointType = userType;
+    if (userType === 'employer' || userType === 'company') endpointType = 'contratante';
+    if (userType === 'freelancer') endpointType = 'freelancer';
+    return request(`/register/${endpointType}`, {
+      method: 'POST',
+      body: userData,
+    });
+  }
+
+  // simular latência (localStorage fallback)
   await sleep(150);
 
   const type = normalizeType(userType);
@@ -207,7 +180,6 @@ export const register = async (userData, userType) => {
     password: userData.password || '', // Nota: armazenamento em texto para dev local apenas
     userType: type,
     createdAt: new Date().toISOString(),
-    // manter dados extras se existirem
     ...(userData.portfolio ? { portfolio: userData.portfolio } : {}),
     ...(userData.companyName ? { companyName: userData.companyName } : {}),
     ...(userData.description ? { description: userData.description } : {}),
@@ -221,6 +193,12 @@ export const register = async (userData, userType) => {
 };
 
 export const login = async (email, password) => {
+  if (API_URL) {
+    return request('/login', {
+      method: 'POST',
+      body: { email, password },
+    });
+  }
   // Local authentication (default) — permanece até integrar o backend relacional.
   await sleep(100);
   const users = loadUsers();
@@ -235,6 +213,9 @@ export const login = async (email, password) => {
 };
 
 export const getStatus = async () => {
+  if (API_URL) {
+    return request('/status');
+  }
   await sleep(20);
   return { status: 'ok', local: true };
 };

@@ -25,11 +25,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 
 // Registrar service worker (PWA)
+// Usa import.meta.env.BASE_URL para respeitar o `base` do Vite (ex: '/trampoff/')
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    const swPath = `${import.meta.env.BASE_URL}service-worker.js`;
+    navigator.serviceWorker.register(swPath)
       .then((registration) => {
-        // Registration successful
         console.log('ServiceWorker registrado com sucesso:', registration.scope);
       })
       .catch((err) => {
