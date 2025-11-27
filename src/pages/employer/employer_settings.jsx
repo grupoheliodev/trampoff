@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { useConfirm } from '../../components/ConfirmProvider';
+import { useAlert } from '../../components/AlertProvider';
 import perfilEmployer from '../../assets/imgs/perfil_employer.png';
 import CardForm from '../../components/CardForm';
 // useEffect imported above
@@ -14,6 +15,7 @@ const EmployerSettings = () => {
     const [showModal, setShowModal] = useState(false);
     const [currentPlan, setCurrentPlan] = useState(user?.plan || 'Free');
     const confirm = useConfirm();
+    const alert = useAlert();
 
     useEffect(() => {
         setCurrentPlan(user?.plan || 'Free');
@@ -60,11 +62,10 @@ const EmployerSettings = () => {
         const amount = prices[plan] || 'R$0,00';
         const ok = await confirm({ title: 'Confirmar compra', message: `Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?` });
         if (!ok) return;
-        alert(`Processando cobrança de ${amount}...`);
-        setTimeout(() => {
-            savePlanInternal(plan);
-            alert(`Pagamento confirmado. Plano ${plan} ativado.`);
-        }, 1200);
+        await alert(`Processando cobrança de ${amount}...`);
+        // aplicar plano
+        savePlanInternal(plan);
+        await alert(`Pagamento confirmado. Plano ${plan} ativado.`);
     };
 
     // profile state
@@ -78,7 +79,7 @@ const EmployerSettings = () => {
         setProfilePhoto(user?.photo || perfilEmployer);
     }, [user]);
 
-    const handleSaveProfile = (e) => {
+    const handleSaveProfile = async (e) => {
         e.preventDefault();
         const updated = { ...user, name: companyName, tagline: companyTagline, location: companyLocation, photo: profilePhoto };
         try {
@@ -93,7 +94,7 @@ const EmployerSettings = () => {
             }
         } catch (e) { }
         updateUser && updateUser(updated);
-        alert('Perfil atualizado.');
+        await alert('Perfil atualizado.');
     };
 
     // payment
@@ -119,17 +120,17 @@ const EmployerSettings = () => {
         } catch (e) { console.error('savePaymentMethods', e); }
     };
 
-    const addPaymentMethod = (card) => {
+    const addPaymentMethod = async (card) => {
         try {
             const arr = [...(paymentMethods || [])];
             arr.push(card);
             savePaymentMethods(arr);
             setShowAddCard(false);
-            alert('Cartão adicionado (visual).');
-        } catch (e) { console.error(e); alert('Falha ao adicionar cartão'); }
+            await alert('Cartão adicionado (visual).');
+        } catch (e) { console.error(e); await alert('Falha ao adicionar cartão'); }
     };
 
-    const handleSavePayment = (e) => {
+    const handleSavePayment = async (e) => {
         e.preventDefault();
         const updated = { ...user, billingAddress };
         try {
@@ -144,7 +145,7 @@ const EmployerSettings = () => {
             }
         } catch (e) { }
         updateUser && updateUser(updated);
-        alert('Informações de pagamento salvas (visual).');
+        await alert('Informações de pagamento salvas (visual).');
     };
 
     const clearLocalData = async () => {
@@ -158,7 +159,7 @@ const EmployerSettings = () => {
         } catch (e) {
             console.error('Erro ao limpar localStorage', e);
         }
-        alert('Dados locais removidos. Você será deslogado.');
+        await alert('Dados locais removidos. Você será deslogado.');
         logout();
         navigate('/');
     };

@@ -51,8 +51,8 @@ const ProfileModal = ({ show, onClose, userType, username, onLogout }) => {
                 <button className="close-button" onClick={onClose} aria-label="Fechar">×</button>
                 <div className="modal-profile-header">
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <img src={preview} alt="Foto de Perfil" className="modal-profile-photo" />
-                        <label style={{ position: 'absolute', right: -6, bottom: -6, background: 'var(--saffron)', borderRadius: '50%', padding: 6, cursor: 'pointer' }} aria-label="Editar foto">
+                        <img src={preview} alt="Foto de Perfil" className="modal-profile-photo theme-adaptable" />
+                        <label className="modal-edit-photo" style={{ position: 'absolute', right: -6, bottom: -6, background: 'var(--saffron)', borderRadius: '50%', padding: 6, cursor: 'pointer' }} aria-label="Editar foto">
                             <input aria-label="Selecionar foto de perfil" type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFile(e.target.files && e.target.files[0])} />
                             ✎
                         </label>

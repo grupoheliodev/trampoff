@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const PWAInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [installed, setInstalled] = useState(false);
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  // not showing manual install instructions per user request; only native install will be offered
 
   useEffect(() => {
     const beforeInstallHandler = (e) => {
@@ -41,33 +41,9 @@ const PWAInstallPrompt = () => {
     }
   };
 
-  const isIos = () => {
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    return /iphone|ipad|ipod/.test(userAgent);
-  };
-
-  const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
   const handleDownloadClick = () => {
-    // Tentar acionar o prompt se disponível
-    if (deferredPrompt) {
-      handleInstallClick();
-      return;
-    }
-
-    // iOS não suporta beforeinstallprompt -> mostrar instruções específicas
-    if (isIos() && !isInStandaloneMode()) {
-      setShowIOSInstructions(true);
-      return;
-    }
-
-    // Fallback: fornecer um download do manifest.json
-    const link = document.createElement('a');
-    link.href = '/manifest.json';
-    link.download = 'manifest.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Try to trigger native prompt if available; otherwise do nothing (no manual instructions)
+    if (deferredPrompt) handleInstallClick();
   };
 
   if (installed) {
@@ -84,37 +60,19 @@ const PWAInstallPrompt = () => {
     <div className="pwa-install">
       {deferredPrompt && (
         <div style={{ marginBottom: 8 }}>
-          <button className="install-button" onClick={handleInstallClick}>
-            Instalar aplicativo
+          <button className="card-button" onClick={handleInstallClick} aria-label="Instalar aplicativo">
+            🚀 Instalar aplicativo
           </button>
         </div>
       )}
 
       {!deferredPrompt && !installed && (
-        <p>Instale o app: abra o menu do navegador e escolha "Adicionar à Tela Inicial" ou use o botão abaixo.</p>
+        <p style={{ opacity: 0.8 }}>Instalação não disponível no momento.</p>
       )}
 
-      <button className="download-button" onClick={handleDownloadClick}>
-        Baixar / Instalar aplicativo
+      <button className="card-button" onClick={handleDownloadClick} aria-label="Baixar ou instalar aplicativo">
+        📥 Instalar aplicativo
       </button>
-
-      {showIOSInstructions && (
-        <div className="ios-instructions" style={{ marginTop: 12, border: '1px solid #ddd', padding: 12, borderRadius: 8 }}>
-          <strong>Como adicionar à Tela Inicial (iPhone/iPad)</strong>
-          <ol style={{ marginTop: 8 }}>
-            <li>Toque no botão <em>Compartilhar</em> (ícone de quadrado com seta) no Safari.</li>
-            <li>Selecione <em>Adicionar à Tela de Início</em>.</li>
-            <li>Confirme tocando em <em>Adicionar</em>.</li>
-          </ol>
-          <button style={{ marginTop: 8 }} onClick={() => setShowIOSInstructions(false)}>Fechar</button>
-        </div>
-      )}
-
-      {installed && (
-        <div style={{ marginTop: 8 }}>
-          <p>Aplicativo instalado ✅</p>
-        </div>
-      )}
     </div>
   );
 };

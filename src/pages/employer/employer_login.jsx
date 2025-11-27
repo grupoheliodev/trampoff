@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useAlert } from '../../components/AlertProvider';
 import logo from '../../assets/imgs/logo.png';
+import logoLight from '../../assets/imgs/fotoclara.png';
+import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const EmployerLogin = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const alert = useAlert();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -15,14 +19,14 @@ const EmployerLogin = () => {
             await login(email, password);
             navigate('/employer/home');
         } catch (error) {
-            alert('E-mail ou senha incorretos!');
+            await alert('E-mail ou senha incorretos!');
         }
     };
 
     return (
         <div className="registration-page">
             <div className="registration-container">
-                <img src={logo} alt="Logo do Projeto" className="logo-small" />
+                <ThemeAwareImage darkSrc={logo} lightSrc={logoLight} alt="Logo do Projeto" className="logo-small theme-adaptable" />
                 <h1 className="registration-title">Login de Empregador</h1>
                 <form className="registration-form" onSubmit={handleSubmit}>
                     <div className="form-group">

@@ -22,6 +22,7 @@
     --text-medium: #a8b3bf;
     --text-dark: #6e798f;
     --glow-color-subtle: rgba(246, 193, 53, 0.3); /* Glow mais discreto */
+    --focus-color: #2b2b2b; /* destaque de foco (agora escuro) */
 
     /* Transições */
     --transition-speed: 0.18s ease-in-out;
@@ -52,21 +53,21 @@ body {
 
 a {
     color: var(--saffron);
-    text-decoration: underline; /* destacar links */
-    text-underline-offset: 3px;
-    text-decoration-thickness: 2px;
+    text-decoration: none; /* links are not underlined by default; toggle via .a11y-highlight-links */
     transition: color var(--transition-speed), background-color var(--transition-speed);
 }
 a:hover,
 a:focus {
-    color: var(--accent-blue);
+    color: var(--focus-color);
     outline: none;
     background: rgba(255,255,255,0.03);
+    text-decoration: underline; /* subtle hover affordance */
+    text-underline-offset: 3px;
 }
 
 /* Foco visível acessível */
 :focus {
-    outline: 3px solid var(--accent-blue);
+    outline: 3px solid var(--focus-color);
     outline-offset: 3px;
 }
 
@@ -75,6 +76,7 @@ button {
     border: none;
     outline: none;
     transition: all var(--transition-speed);
+    background-color: transparent;
 }
 button:focus {
     outline: 3px solid var(--accent-blue);
@@ -107,138 +109,340 @@ input:focus, textarea:focus {
    2. Layout Principal e Cabeçalho
    ========================================================================== */
 .main-content {
-    padding: 2.5rem 2rem;
+    padding: 0.5rem 2rem;
     max-width: 1280px;
     margin: 0 auto;
 }
 
 .main-header {
-    padding: 1rem 2.5rem;
+    padding: 0.6rem 1.2rem 0.8rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    position: sticky;
-    top: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    position: relative;
     z-index: 1000;
-    /* Glassmorphism mais leve */
-    background: rgba(25, 31, 68, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(25, 31, 68, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.main-header.is-scrolled {
+    transform: translateY(-16px);
+    background: rgba(20, 26, 58, 0.92);
+    box-shadow: 0 18px 38px rgba(0,0,0,0.45);
 }
 
 .logo {
-    height: 60px; /* Tamanho ajustado */
+    height: 160px; /* logo maior estilo "Google" no topo */
     width: auto;
-    border-radius: 8px;
+    max-height: 160px;
+    border-radius: 0; /* sem círculo em volta da logo principal */
+    display: block;
     transition: transform var(--transition-speed);
 }
-.logo:hover {
-    transform: scale(1.05);
-}
+.logo:hover { transform: scale(1.04); }
 
-.logo-container {
+.logo-button {
     flex: 0 0 auto;
-    margin-right: 1rem;
+    align-self: center;
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+}
+
+.logo-title {
+    font-weight: 800;
+    letter-spacing: 0.14rem;
+    font-size: 0.85rem;
+    color: var(--saffron);
+    border: 1px solid var(--saffron);
+    border-radius: 8px;
+    padding: 0.25rem 0.75rem;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    justify-content: flex-end;
+}
+
+@media (min-width: 1280px) {
+    /* contêiner adapta-se ao tamanho da logo (138px) + padding */
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: min(420px, 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    background: rgba(8, 12, 30, 0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 14px 24px rgba(0,0,0,0.22);
+}
+
+.header-controls .search-bar input {
+    border: none;
+    padding: 0.7rem 1rem;
+    background: transparent;
+    color: var(--text-light);
+    outline: none;
+    flex: 1 1 auto;
+    min-width: 140px;
+    font-size: 1rem;
+}
+
+.header-controls .search-bar button {
+    background-color: var(--saffron);
+    border: none;
+    width: 60px;
+    height: 100%;
+    cursor: pointer;
+    color: var(--big-stone);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
 }
 
 .main-nav {
-    /* allow the nav to take available space and keep links closer to the logo */
     flex: 1 1 auto;
     display: flex;
-    justify-content: flex-start; /* changed from center to start to reduce gap */
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    gap: 0.4rem; /* deixa nav mais compacta para não ficar espaçada demais quando quebrar linha */
 }
 .main-nav ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    gap: 1.2rem; /* reduced gap between links */
-    flex-wrap: wrap;
+    gap: 0.4rem; /* reduz distância entre itens para parecer mais junto */
+    flex-wrap: nowrap;
+    justify-content: center;
 }
+
+/* Hide the native desktop UL on small screens; hamburger will control mobile overlay */
+.main-nav .desktop-links { display: flex; gap: 0.9rem; align-items: center; }
+
+/* Hamburger button */
+.hamburger {
+    display: none; /* visible on small screens only */
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.04);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 8px;
+}
+.hamburger:focus { outline: 3px solid rgba(0,114,178,0.14); }
+.hamburger-box { display: inline-block; width: 22px; height: 14px; position: relative; }
+.hamburger-inner, .hamburger-inner:before, .hamburger-inner:after {
+    width: 22px; height: 2px; background: var(--text-light); display: block; position: absolute; left: 0; transition: transform 200ms ease, opacity 200ms ease;
+}
+.hamburger-inner { top: 6px; }
+.hamburger-inner:before { content: ''; top: -6px; }
+.hamburger-inner:after { content: ''; top: 6px; }
+.hamburger.is-open .hamburger-inner { transform: rotate(45deg); }
+.hamburger.is-open .hamburger-inner:before { transform: rotate(90deg) translateX(0); top: 0; }
+.hamburger.is-open .hamburger-inner:after { opacity: 0; }
+
+/* Mobile overlay menu — centered */
+.mobile-nav-overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.96); /* darker background per request */
+    z-index: 4000;
+    padding: 1.25rem;
+    animation: menuFadeIn 160ms ease-out;
+}
+
+.mobile-nav-overlay .mobile-close {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.6rem;
+    padding: 8px;
+    cursor: pointer;
+}
+
+
+.mobile-nav-overlay .mobile-nav-panel {
+    width: min(92%, 560px);
+    max-width: 560px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 14px;
+    padding: clamp(12px, 3.5vw, 20px);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+}
+
+.mobile-nav-overlay ul { list-style: none; margin: 0; padding: 0; text-align: center; }
+.mobile-nav-overlay li { margin: 8px 0; }
+.mobile-nav-overlay a, .mobile-nav-overlay button.mobile-back {
+    font-size: clamp(16px, 2.8vw, 18px);
+    color: var(--text-light);
+    padding: 14px 16px;
+    display: inline-block;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    line-height: 1.1;
+    min-height: 48px; /* ensure adequate touch target */
+}
+.mobile-nav-overlay a:hover, .mobile-nav-overlay button.mobile-back:hover { background: rgba(255,255,255,0.02); color: var(--saffron); }
+.mobile-nav-overlay a.active { color: var(--saffron); }
+.mobile-nav-overlay .mobile-separator { height: 1px; background: rgba(255,255,255,0.03); margin: 8px 0; }
+
+@media (max-width: 420px) {
+    .mobile-nav-overlay .mobile-nav-panel { padding: 12px; width: calc(100% - 24px); }
+    .mobile-nav-overlay a, .mobile-nav-overlay button.mobile-back { font-size: 15px; padding: 12px; min-height: 44px; }
+    .mobile-nav-overlay .mobile-close { right: 8px; top: 8px; }
+}
+
+@keyframes menuFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
 .main-nav a {
     color: var(--text-light);
-    font-weight: bold;
+    font-weight: 700;
     position: relative;
-    padding: 0.5rem 0;
+    padding: 0.6rem 1rem;
+    border-radius: 24px;
+    transition: background-color var(--transition-speed), color var(--transition-speed), transform var(--transition-speed);
+}
+.main-nav li {
+    display: inline-flex;
+    align-items: center;
+}
+.main-nav a:hover {
+    background: rgba(255,255,255,0.03);
+    transform: translateY(-2px);
 }
 .main-nav a:after {
     content: '';
     position: absolute;
     width: 0;
     height: 3px;
-    bottom: 0;
+    bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--saffron);
+    border-radius: 3px;
     transition: width var(--transition-speed);
 }
 .main-nav a:hover:after,
 .main-nav a.active:after {
-    width: 100%;
+    width: 70%;
 }
 .main-nav a.active {
     color: var(--saffron);
-}
-
-.search-profile-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+    background: linear-gradient(90deg, rgba(246,193,53,0.06), rgba(246,193,53,0.02));
 }
 
 .search-bar {
     display: flex;
-    border-radius: 20px;
+    border-radius: 28px;
     overflow: hidden;
-    background-color: rgba(0,0,0,0.2);
-    border: 1px solid var(--border-color);
+    background-color: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.03);
+    align-items: center;
 }
 
 .search-bar input {
     border: none;
-    padding: 0.5rem 1rem;
-    background: none;
+    padding: 0.6rem 1rem;
+    background: transparent;
     color: var(--text-light);
     outline: none;
-    /* prevent global input width:100% from breaking header layout */
-    width: auto;
+    width: 260px;
     min-width: 140px;
-    max-width: 280px;
 }
 
 .search-bar button {
     background-color: var(--saffron);
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 0.9rem;
     cursor: pointer;
     color: var(--big-stone);
+    border-radius: 0 26px 26px 0;
+    margin-left: 6px;
 }
+
+.search-bar button svg, .search-bar button img { display: inline-block; vertical-align: middle; }
+
+/* Dropdown de resultados da busca (tema escuro) */
+.search-results {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, rgba(15,20,36,0.98), rgba(10,12,22,0.98));
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    z-index: 2500;
+    max-height: 320px;
+    overflow: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    padding: 6px 0;
+}
+.search-results ul { list-style: none; margin: 0; padding: 0; }
+.search-results li { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
+.search-results li:hover { background: rgba(255,255,255,0.02); }
+.search-results .result-meta { color: var(--text-medium); font-size: 0.9rem; }
 
 .profile-area {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     cursor: pointer;
-    padding: 0.4rem;
+    padding: 0.45rem 0.95rem;
     border-radius: 30px;
-    background: transparent;
-    border: 1px solid transparent;
+    background: rgba(7, 10, 28, 0.92);
+    border: 1px solid rgba(255,255,255,0.08);
     transition: all var(--transition-speed);
 }
 .profile-area:hover {
     background: rgba(0,0,0,0.2);
-    border-color: var(--border-color);
+    border-color: var(--saffron);
 }
 
 .profile-name {
-    font-weight: bold;
+    font-weight: 700;
     color: var(--text-light);
 }
 
@@ -256,21 +460,303 @@ input:focus, textarea:focus {
     object-fit: cover;
 }
 
+/* Header nav badge (unread notifications) */
+.main-nav li { position: relative; }
+.nav-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    background: #e74c3c;
+    color: white;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+/* Modal profile photo (larger, saffron ring) */
+.modal-profile-photo {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 4px solid var(--saffron);
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6), 0 0 0 6px rgba(246,193,53,0.08);
+    object-fit: cover;
+}
+
+.profile-modal .modal-profile-header { text-align: center; padding: 1rem 1.2rem; }
+.profile-modal .modal-profile-name { margin: 0.6rem 0 0; font-size: 1.1rem; color: var(--text-light); }
+.profile-modal .modal-profile-role { margin: 0.2rem 0 0; color: var(--text-medium); }
+
+.profile-modal-content { background: linear-gradient(180deg, rgba(15,20,36,0.98), rgba(10,12,22,0.98)); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 12px; max-width: 360px; }
+.profile-modal { position: fixed; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; z-index:5000; }
+.profile-modal.is-active { visibility: visible; }
+.profile-modal.fade-in { animation: fadeIn 220ms ease-out; }
+.close-button { position: absolute; right: 10px; top: 8px; background: transparent; border: none; color: var(--text-light); font-size: 1.4rem; cursor: pointer; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Theme: Light overrides (applied when documentElement has data-theme="light") */
+[data-theme="light"] {
+    --bg-gradient-start: #ffffff;
+    --bg-gradient-end: #ffffff;
+    --text-light: #0f1724;
+    --text-medium: #475569;
+    --text-dark: #0b1a2b;
+    --gun-powder: #f5f7fb;
+    --border-color: rgba(2,6,23,0.06);
+    --glow-color-subtle: rgba(246,193,53,0.08);
+    --saffron: #e6b21a;
+}
+
+/* Theme toggle button in header */
+.theme-toggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-light);
+    cursor: pointer;
+    margin-right: 6px;
+}
+.theme-toggle:focus { outline: 3px solid rgba(0,0,0,0.08); }
+.theme-toggle.light {
+    background: var(--saffron);
+    color: var(--big-stone);
+    border-color: rgba(0,0,0,0.06);
+}
+
+/* Light-mode refinements: improve contrast, buttons, cards and inputs */
+[data-theme="light"] body {
+    background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+    color: var(--text-dark);
+}
+
+[data-theme="light"] .main-header {
+    background: linear-gradient(180deg, #ffffff, #fbfbfd);
+    border-bottom: 1px solid rgba(2,6,23,0.06);
+}
+
+[data-theme="light"] .main-nav a {
+    color: var(--text-dark);
+}
+
+[data-theme="light"] .main-nav a.active {
+    color: var(--saffron);
+    background: rgba(230,178,26,0.08);
+}
+
+[data-theme="light"] .search-bar {
+    background: #fff;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .search-bar input {
+    color: var(--text-dark);
+    background: transparent;
+}
+
+[data-theme="light"] .search-bar button {
+    background: var(--saffron);
+    color: #081226;
+}
+
+[data-theme="light"] .card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    box-shadow: 0 6px 18px rgba(11,26,43,0.06);
+}
+
+[data-theme="light"] .card-button {
+    background: linear-gradient(90deg, #0ea5e9, #0077c2);
+    color: #fff;
+}
+
+[data-theme="light"] .welcome-title {
+    color: #ff9f1c; /* saffron-like for warm greeting */
+    text-shadow: none;
+}
+
+/* Improve contrast for small text in light mode */
+[data-theme="light"] .welcome-subtitle,
+[data-theme="light"] .card-description,
+[data-theme="light"] .modal-profile-role,
+[data-theme="light"] .user-sub {
+    color: var(--text-medium);
+}
+
+/* Images that should adapt: allow gentle inversion or brightness change in light mode */
+.theme-adaptable { transition: filter 180ms ease-in-out, opacity 180ms ease-in-out; }
+[data-theme="light"] .theme-adaptable {
+    filter: none; /* default for light: show original */
+}
+[data-theme="dark"] .theme-adaptable {
+    filter: drop-shadow(0 8px 18px rgba(2,6,23,0.6));
+}
+
+/* Buttons and controls adjustments for accessibility */
+[data-theme="light"] button, [data-theme="light"] .card-button {
+    border-radius: 12px;
+    padding: 0.85rem 1.25rem;
+    font-weight: 700;
+}
+
+[data-theme="light"] .profile-photo { border-color: var(--saffron); }
+
+/* Make chat bubbles readable in light mode */
+[data-theme="light"] .chat-box { background: transparent; }
+[data-theme="light"] .message.sent { background: linear-gradient(90deg,#e6f7ff,#d0efff); color: #05233a; }
+[data-theme="light"] .message.received { background: #fff; color: #05233a; }
+
+/* Ensure inputs are visible in light mode */
+[data-theme="light"] input, [data-theme="light"] textarea { background: #fff; color: var(--text-dark); border: 1px solid var(--border-color); }
+
 
 /* ==========================================================================
    3. Estilos de Seção e Títulos
    ========================================================================== */
 .welcome-section {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    margin-top: 3.5rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem 0;
+}
+
+/* Projects hero (empty state) */
+.projects-hero {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 0 3rem;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: cover;
+}
+.projects-hero-inner {
     text-align: center;
-    margin-top: 3rem;
-    margin-bottom: 2rem;
+    max-width: 720px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+.projects-illustration {
+    width: min(50%, 520px); /* reduz um pouco para alinhar com outras páginas */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+.projects-hero-title {
+    font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+    color: var(--text-light);
+    margin: 0;
+}
+.projects-hero-sub {
+    color: var(--text-medium);
+    margin: 0;
+}
+
+/* If the projects background asset exists, prefer it */
+.projects-hero.has-bg { background-image: url('../imgs/projetos_fundo.png'); }
+
+/* Generic image placeholder to reserve space for future illustrations */
+.img-placeholder {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 16px;
+    width: 100%;
+    height: 280px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+
+.hero-illustration { width: min(520px, 90%); height: clamp(220px, 32vw, 340px); display: flex; align-items: center; justify-content: center; }
+.hero-illustration img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.projects-illustration.img-placeholder { height: clamp(220px, 38vw, 360px); }
+
+/* Contracts (empty state) split hero */
+.contracts-hero {
+    display: grid;
+    grid-template-columns: 1fr minmax(260px, 520px);
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem 0 0.5rem;
+}
+.contracts-hero-left { display: flex; align-items: center; }
+.contracts-empty-text { font-size: 1.1rem; color: var(--text-medium); margin: 0 0 0 0.25rem; }
+.contracts-hero-right { display: flex; justify-content: center; }
+.contracts-illustration { width: 100%; height: auto; max-height: clamp(220px, 34vw, 360px); border-radius: 16px; object-fit: contain; }
+
+@media (max-width: 768px) {
+    .contracts-hero { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+/* Jobs hero placeholder (Trabalhos Disponíveis) */
+.jobs-hero {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem 0 1.6rem;
+}
+.jobs-illustration { width: min(60%, 720px); height: auto; max-height: clamp(200px, 32vw, 320px); border-radius: 16px; object-fit: contain; }
+
+@media (max-width: 480px) {
+    .projects-illustration { width: min(80%, 420px); }
+    .projects-hero { padding: 1.5rem 0; }
+}
+
+/* Em telas menores, restaurar o fluxo normal para evitar sobreposição do menu */
+@media (max-width: 880px) {
+    .main-header { padding: 0.6rem 1rem 0.7rem; }
+    .header-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .search-row { padding: 0 0.5rem; }
+}
+
+.welcome-content {
+    flex: 1 1 50%;
 }
 
 .welcome-title {
     color: var(--saffron);
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 15px rgba(246, 193, 53, 0.4); /* Sombra de texto mais suave */
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    margin-bottom: 0.8rem;
+    line-height: 1.02;
+    text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+.welcome-illustration {
+    flex: 0 0 46%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.welcome-illustration img {
+    max-width: 100%;
+    height: auto;
 }
 
 .welcome-subtitle {
@@ -375,13 +861,13 @@ input:focus, textarea:focus {
 }
 
 .logo-large, .logo-small {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: 180px;
+    height: auto;
+    border-radius: 0; /* tira círculo redondo das logos das telas iniciais */
+    object-fit: contain;
     margin-bottom: 2rem;
-    border: 3px solid var(--saffron);
-    box-shadow: 0 0 20px var(--glow-color-subtle); /* Glow mais discreto */
+    border: none;
+    box-shadow: none;
 }
 
 .selection-title {
@@ -520,6 +1006,7 @@ input:focus, textarea:focus {
 .profile-card {
     padding: 2rem;
     align-items: center;
+    background: linear-gradient(145deg, var(--gun-powder), #2d3047); /* fundo escuro igual aos outros cards */
 }
 
 .profile-header {
@@ -713,6 +1200,24 @@ input:focus, textarea:focus {
     border-top: 1px solid rgba(132, 149, 169, 0.2);
 }
 
+/* Make chat input sticky inside the chat box on narrow screens and ensure good touch targets */
+.chat-box { position: relative; }
+.chat-input {
+    background: transparent;
+    padding: 0.9rem;
+    align-items: center;
+}
+.chat-input.sticky, .chat-box .chat-input {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.chat-input input { min-height: 48px; font-size: 1rem; }
+.chat-input button { min-width: 84px; padding: 0.9rem 1.2rem; font-weight: 700; }
+
 .chat-input input {
     flex-grow: 1;
     padding: 0.8rem;
@@ -771,7 +1276,7 @@ input:focus, textarea:focus {
 }
 
 /* Painel lateral de acessibilidade */
-.a11y-panel { position: fixed; right: 14px; top: 40%; z-index: 1400; display: flex; align-items: center; }
+.a11y-panel { position: fixed; right: 14px; top: 30%; z-index: 1400; display: flex; align-items: center; }
 .a11y-panel .a11y-toggle { background: var(--accent-blue); color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.32); width:56px; height:56px; font-size: 1.25rem; display:inline-flex; align-items:center; justify-content:center; }
 .a11y-panel .a11y-body { display: none; margin-right: 12px; width: 420px; max-width: calc(100vw - 30px); max-height: 80vh; overflow: auto; background: linear-gradient(145deg, var(--gun-powder), #2d3047); border-radius: 12px; padding: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.5); color: var(--text-light); box-sizing: border-box; word-break: break-word; white-space: normal; }
 .a11y-panel.open .a11y-body { display: block; }
@@ -802,15 +1307,14 @@ input:focus, textarea:focus {
 .a11y-reduce-motion .selection-container,
 .a11y-reduce-motion .registration-container,
 .a11y-reduce-motion .list-container .card,
-.a11y-reduce-motion .profile-modal,
 .a11y-reduce-motion .profile-modal-content {
     opacity: 1 !important;
     transform: none !important;
 }
 
-/* Para modais que usavam scale/opacity para aparecer, forçar visibilidade */
-.a11y-reduce-motion .profile-modal { display: flex !important; }
-.a11y-reduce-motion .profile-modal-content { display: block !important; }
+/* For users who reduce motion, ensure active modals are visible but do not force hidden modals open */
+.a11y-reduce-motion .profile-modal.is-active { display: flex !important; }
+.a11y-reduce-motion .profile-modal.is-active .profile-modal-content { display: block !important; }
 
 /* ==========================
    Botões - variantes elegantes
@@ -918,7 +1422,7 @@ input:focus, textarea:focus {
 .profile-modal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 3000;
     left: 0;
     top: 0;
     width: 100%;
@@ -945,6 +1449,11 @@ input:focus, textarea:focus {
 
 .profile-modal.is-active {
     display: flex; /* Esta é a regra que torna o modal visível */
+}
+
+/* Ensure site modals and overlays appear above the sticky header */
+.modal, .modal-backdrop, .project-modal, .create-project-modal, .confirm-modal, .prompt-modal {
+    z-index: 3000 !important;
 }
 
 .close-button {
@@ -1014,17 +1523,19 @@ input:focus, textarea:focus {
 
 @media (max-width: 992px) {
     .main-header {
-        flex-direction: column;
-        justify-content: center;
+        padding: 0.8rem 1.4rem 1rem;
     }
 
     .main-nav ul {
+        flex-wrap: wrap;
         justify-content: center;
-        gap: 1.5rem;
+        gap: 0.8rem;
     }
 
-    .search-profile-container {
-        justify-content: center;
+    .header-controls {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 0.6rem;
     }
 
     .messages-container {
@@ -1039,23 +1550,30 @@ input:focus, textarea:focus {
     }
 
     .logo {
-        height: 60px;
+        height: 140px; /* versão levemente menor em telas pequenas para não ocupar demais */
     }
 
-    .main-nav ul {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
+    .header-row {
+        gap: 0.6rem;
     }
 
-    .search-profile-container {
+    .header-controls {
         flex-direction: column;
+        align-items: stretch;
         width: 100%;
     }
+
+    .profile-area {
+        justify-content: space-between;
+    }
+
+    /* On smaller screens hide desktop links and show hamburger */
+    .hamburger { display: inline-flex; }
+    .main-nav .desktop-links { display: none; }
     
     .search-bar {
         width: 100%;
-        max-width: 400px;
+        max-width: none;
     }
 
     .welcome-title {
@@ -1084,4 +1602,28 @@ input:focus, textarea:focus {
     .profile-name-large {
         font-size: 1.8rem;
     }
+
+    /* Chat layout adjustments for small screens */
+    .messages-container { gap: 0.5rem; }
+    .message-list { order: 2; }
+    .chat-box { order: 1; }
+    .message-content { max-width: 92%; }
+    .message-avatar { width: 40px; height: 40px; }
+    .chat-input { padding: 0.6rem; gap: 0.5rem; }
+    .chat-input input { padding: 0.75rem; font-size: 0.95rem; }
+    .chat-input button { padding: 0.7rem 1rem; min-width: 72px; }
+}
+
+/* Ensure mobile overlay panel centers and doesn't stretch weirdly */
+.mobile-nav-overlay {
+    padding: 0.8rem;
+}
+.mobile-nav-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mobile-nav-panel ul { width: 100%; max-width: 520px; }
+.mobile-nav-panel li { width: 100%; }
+.mobile-nav-panel a, .mobile-nav-panel button { width: 100%; }
+
+/* Make sure the header only shows logo + hamburger on small screens */
+@media (max-width: 480px) {
+    .hamburger { width: 40px; height: 40px; }
 }

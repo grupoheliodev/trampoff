@@ -7,7 +7,7 @@ import { getReviewsForUser, getReviewStatsForUser } from '../../services/api';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 
 const FreelancerProfile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [profilePicture, setProfilePicture] = useState(perfilFreelancer);
@@ -33,6 +33,10 @@ const FreelancerProfile = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setProfilePicture(reader.result);
+                // Atualiza o contexto global do usuário
+                if (user) {
+                    updateUser({ ...user, photo: reader.result });
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -40,7 +44,7 @@ const FreelancerProfile = () => {
 
     return (
         <div>
-            <Header userType="freelancer" username={user?.name} onProfileClick={() => setShowModal(true)} profilePicture={profilePicture} />
+            <Header userType="freelancer" username={user?.name} onProfileClick={() => setShowModal(true)} profilePicture={user?.photo || profilePicture} />
             <ProfileModal show={showModal} onClose={() => setShowModal(false)} userType="freelancer" username={user?.name} onLogout={handleLogout} />
 
             <main className="main-content">
@@ -49,10 +53,10 @@ const FreelancerProfile = () => {
                     <div className="profile-card card">
                         <div className="profile-header">
                             <img src={profilePicture} alt="Foto grande do Freelancer" className="profile-photo-large"/>
+                            <h3 className="profile-name-large">{user?.name || 'Nome do Freelancer'}</h3>
                             <input type="file" accept="image/*" onChange={handleProfilePictureChange} style={{ display: 'none' }} id="profile-picture-input" />
                             <label htmlFor="profile-picture-input" className="card-button">Alterar Foto</label>
                             <div className="profile-info">
-                                <h3 className="profile-name-large">{user?.name || 'Nome do Freelancer'}</h3>
                                 <p className="profile-tagline">Desenvolvedor Front-end | Especialista em UI/UX</p>
                                 <p className="profile-location">São Paulo, Brasil</p>
                                 <div className="rating-summary" style={{ marginTop: 8 }}>

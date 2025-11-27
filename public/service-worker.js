@@ -1,12 +1,17 @@
 const CACHE_NAME = 'trampoff-cache-v1';
+// During development the app may be served under a base path (Vite `base`).
+// Use the service worker scope to build correct absolute asset paths.
+const scopePath = (self.registration && self.registration.scope) ? new URL(self.registration.scope).pathname : '/';
+const prefix = scopePath.endsWith('/') ? scopePath.slice(0, -1) : scopePath;
+
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/offline.html',
-  '/logo.png',
-  '/src/assets/imgs/logo.png',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  `${prefix}/`,
+  `${prefix}/index.html`,
+  `${prefix}/offline.html`,
+  `${prefix}/logo.png`,
+  `${prefix}/src/assets/imgs/logo.png`,
+  `${prefix}/icons/icon-192.png`,
+  `${prefix}/icons/icon-512.png`
 ];
 
 self.addEventListener('install', (event) => {

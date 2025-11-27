@@ -40,3 +40,5 @@ Thumbs.db
 # Relatórios de Testes
 # Pasta gerada por ferramentas de teste como Jest ou Vitest.
 coverage
+# Ignored large binary
+src/assets/imgs/CALST01EP03.mp4

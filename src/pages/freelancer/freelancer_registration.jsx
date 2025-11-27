@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/imgs/logo.png';
+import logoLight from '../../assets/imgs/fotoclara.png';
+import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const FreelancerRegistration = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', portfolio: '', cad: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirmation: '', phone: '', portfolio: '', cad: '' });
     const [cadError, setCadError] = useState('');
+    const [phoneError, setPhoneError] = useState('');
 
     const onlyDigits = (v) => (v || '').toString().replace(/\D/g, '');
 
@@ -93,6 +96,25 @@ const FreelancerRegistration = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const onlyDigitsPhone = (v) => (v || '').toString().replace(/\D/g, '');
+
+    const formatPhone = (value) => {
+        const d = onlyDigitsPhone(value);
+        if (!d) return '';
+        if (d.length <= 2) return `(${d}`;
+        if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+        if (d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6,10)}`;
+        return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7,11)}`;
+    };
+
+    const handlePhoneChange = (e) => {
+        const raw = e.target.value;
+        const formatted = formatPhone(raw);
+        setFormData(prev => ({ ...prev, phone: formatted }));
+        const digits = onlyDigitsPhone(formatted);
+        if (digits.length < 10) setPhoneError('Telefone inválido'); else setPhoneError('');
+    };
+
     const handleCadChange = (e) => {
         const raw = e.target.value;
         const formatted = formatCpfCnpj(raw);
@@ -118,8 +140,18 @@ const FreelancerRegistration = () => {
             setCadError('CPF/CNPJ inválido');
             return;
         }
+        // validar telefone e confirmação de senha
+        const phoneDigits = onlyDigitsPhone(formData.phone);
+        if (!phoneDigits || phoneDigits.length < 10) {
+            setPhoneError('Telefone inválido');
+            return;
+        }
+        if (!formData.password || formData.password !== formData.passwordConfirmation) {
+            setRegistrationError('As senhas não coincidem');
+            return;
+        }
         try {
-            await register({ name: formData.name, email: formData.email, password: formData.password }, 'freelancer');
+            await register({ name: formData.name, email: formData.email, password: formData.password, passwordConfirmation: formData.passwordConfirmation, phone: formData.phone, cad: formData.cad, portfolio: formData.portfolio }, 'freelancer');
             navigate('/freelancer/home');
         } catch (error) {
             // Mostrar mensagem de erro mais útil quando disponível
@@ -132,7 +164,7 @@ const FreelancerRegistration = () => {
     return (
         <div className="registration-page">
             <div className="registration-container">
-                <img src={logo} alt="Logo do Projeto" className="logo-small" />
+                <ThemeAwareImage darkSrc={logo} lightSrc={logoLight} alt="Logo do Projeto" className="logo-small theme-adaptable" />
                 <h1 className="registration-title">Cadastro de Freelancer</h1>
                 <p className="registration-subtitle">Preencha os dados abaixo para começar a encontrar projetos.</p>
                 <form id="freelancer-registration-form" className="registration-form" onSubmit={handleSubmit}>
@@ -162,6 +194,15 @@ const FreelancerRegistration = () => {
                     <div className="form-group">
                         <label htmlFor="password">Senha</label>
                         <input type="password" id="password" name="password" placeholder="Digite sua senha" onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="passwordConfirmation">Confirme a Senha</label>
+                        <input type="password" id="passwordConfirmation" name="passwordConfirmation" placeholder="Repita a senha" onChange={handleChange} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="phone">Telefone</label>
+                        <input type="text" id="phone" name="phone" inputMode="tel" value={formData.phone} onChange={handlePhoneChange} placeholder="(99) 99999-9999" maxLength={16} required />
+                        {phoneError && <small style={{ color: 'red' }}>{phoneError}</small>}
                     </div>
                     <div className="form-group">
                         <label htmlFor="portfolio">Link do Portfólio (opcional)</label>

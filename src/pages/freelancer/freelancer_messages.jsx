@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getUsers, getMessages, sendMessage } from '../../services/api';
+import { useAlert } from '../../components/AlertProvider';
 import perfilEmployer from '../../assets/imgs/perfil_employer.png';
 
 const FreelancerMessages = () => {
@@ -15,36 +17,61 @@ const FreelancerMessages = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const alert = useAlert();
     const messagesRef = useRef(null);
 
+    // Atualização de perfis via REST
     useEffect(() => {
-        // carregar lista de employers do backend local
         let mounted = true;
-        getUsers('employer').then(list => {
-            if (mounted) setUsers(list || []);
-        }).catch(() => setUsers([]));
-        const onUsersUpdated = () => {
-            getUsers('employer').then(list => {
-                setUsers(list || []);
-                if (selectedUser) {
-                    const updated = (list || []).find(u => u.id === selectedUser.id);
+        const loadUsers = async () => {
+            try {
+                const list = await getUsers('employer');
+                if (mounted) setUsers(list || []);
+                if (selectedUser && list.length > 0) {
+                    const updated = list.find(u => u.id === selectedUser.id);
                     if (updated) setSelectedUser(updated);
                 }
-            }).catch(() => {});
+            } catch (e) {
+                setUsers([]);
+            }
         };
-        window.addEventListener('trampoff:users-updated', onUsersUpdated);
-        return () => { mounted = false; window.removeEventListener('trampoff:users-updated', onUsersUpdated); };
-    }, []);
+        loadUsers();
+        const interval = setInterval(loadUsers, 2000);
+        return () => {
+            mounted = false;
+            clearInterval(interval);
+        };
+    }, [selectedUser]);
 
+    // support opening conversation via ?userId= in URL
+    const location = useLocation();
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const uid = params.get('userId');
+        if (uid && users && users.length > 0) {
+            const found = users.find(u => String(u.id) === String(uid));
+            if (found) setSelectedUser(found);
+        }
+    }, [location.search, users]);
+
+    // Atualização de mensagens via REST
     useEffect(() => {
         if (!selectedUser) return;
         let mounted = true;
-        getMessages(user.id, selectedUser.id).then((msgs) => {
-            if (mounted) setMessages(msgs || []);
-        }).catch(() => {
-            if (mounted) setMessages([]);
-        });
-        return () => { mounted = false };
+        const loadMessages = async () => {
+            try {
+                const msgs = await getMessages(user.id, selectedUser.id);
+                if (mounted) setMessages(msgs || []);
+            } catch (e) {
+                if (mounted) setMessages([]);
+            }
+        };
+        loadMessages();
+        const interval = setInterval(loadMessages, 1500);
+        return () => {
+            mounted = false;
+            clearInterval(interval);
+        };
     }, [selectedUser, user.id]);
 
     useEffect(() => {
@@ -52,18 +79,19 @@ const FreelancerMessages = () => {
         if (el) setTimeout(() => { el.scrollTop = el.scrollHeight; }, 50);
     }, [messages]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!newMessage.trim() || !selectedUser) return;
-
         setLoading(true);
-        sendMessage(user.id, selectedUser.id, newMessage)
-            .then(() => getMessages(user.id, selectedUser.id))
-            .then((msgs) => setMessages(msgs || []))
-            .catch((err) => {
-                console.error('Erro ao enviar mensagem', err);
-                alert(err?.message || 'Erro ao enviar mensagem');
-            })
-            .finally(() => setLoading(false));
+        try {
+            await sendMessage(user.id, selectedUser.id, newMessage);
+            const msgs = await getMessages(user.id, selectedUser.id);
+            setMessages(msgs || []);
+        } catch (err) {
+            console.error('Erro ao enviar mensagem', err);
+            await alert(err?.message || 'Erro ao enviar mensagem');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleLogout = () => {

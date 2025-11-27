@@ -8,50 +8,22 @@
 */
 
 /*
-  Integração opcional com backend relacional (login) e Firebase (Firestore)
+  Integração opcional com backend relacional (login)
   ---
   Nota: para manter o aplicativo rodando localmente por enquanto, o código
   de integração fica comentado abaixo. Quando quiser ativar:
 
   1) Adicione as variáveis no `.env` (Vite):
      VITE_RELATIONAL_API_URL=https://seu-backend-relacional.example.com/api
-     VITE_FIREBASE_API_KEY=...
-     VITE_FIREBASE_AUTH_DOMAIN=...
-     VITE_FIREBASE_PROJECT_ID=...
-     VITE_FIREBASE_STORAGE_BUCKET=...
-     VITE_FIREBASE_MESSAGING_SENDER_ID=...
-     VITE_FIREBASE_APP_ID=...
 
-  2) Instale a dependência `firebase` e remova o comentário nas linhas
-     abaixo para inicializar o Firestore.
 
-  // import { initializeApp } from 'firebase/app';
-  // import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from 'firebase/firestore';
 
-  // const RELATIONAL_URL = import.meta.env.VITE_RELATIONAL_API_URL || '';
-  // const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY || '';
 
-  // let db = null;
-  // if (FIREBASE_API_KEY) {
-  //   const firebaseConfig = {
-  //     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  //     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  //     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  //     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  //     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  //     appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  //   };
-  //   try {
-  //     const app = initializeApp(firebaseConfig);
-  //     db = getFirestore(app);
-  //     console.info('[firebase] Firestore inicializado');
-  //   } catch (e) {
-  //     console.warn('[firebase] falha ao inicializar Firestore', e);
-  //     db = null;
-  //   }
-  // }
 
-*/
+
+
+
+
 
 /*
   Código de conexão com backend (ativo quando VITE_RELATIONAL_API_URL estiver definido).
@@ -105,36 +77,6 @@ async function request(endpoint, options = {}) {
   }
 }
 
-const USERS_KEY = 'trampoff_users';
-const MESSAGES_KEY = 'trampoff_messages';
-
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-
-const loadUsers = () => {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-};
-
-const saveUsers = (users) => {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-};
-
-const loadMessages = () => {
-  try {
-    const raw = localStorage.getItem(MESSAGES_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-};
-
-const saveMessages = (messages) => {
-  localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
-};
 
 const normalizeType = (t) => {
   if (!t) return 'freelancer';
@@ -142,8 +84,6 @@ const normalizeType = (t) => {
   if (t === 'employer' || t === 'company') return 'employer';
   return t;
 };
-
-const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
 
 export const register = async (userData, userType) => {
   // If an API URL is configured, call the backend; otherwise use localStorage fallback
@@ -187,6 +127,10 @@ export const register = async (userData, userType) => {
 
   users.push(newUser);
   saveUsers(users);
+  // Dispara evento customizado para atualização instantânea em todas as abas
+  try {
+    window.dispatchEvent(new CustomEvent('trampoff:users-updated', { detail: { user: newUser } }));
+  } catch (e) { /* ignore in non-browser envs */ }
 
   const token = btoa(`${newUser.email}:${Date.now()}`);
   return { token, user: { ...newUser, password: undefined } };
@@ -221,28 +165,26 @@ export const getStatus = async () => {
 };
 
 export const sendMessage = async (senderId, receiverId, content) => {
-  await sleep(60);
-  const messages = loadMessages();
-  const msg = {
-    id: generateId(),
-    senderId,
-    receiverId,
-    content,
-    createdAt: new Date().toISOString(),
-  };
-  messages.push(msg);
-  saveMessages(messages);
-  return msg;
+  // Persist to backend relational API
+  return request('/messages', {
+    method: 'POST',
+    body: { senderId, receiverId, content },
+  });
 };
 
 export const getMessages = async (senderId, receiverId) => {
-  await sleep(60);
-  const messages = loadMessages();
-  // retornar conversas entre os dois (ambos os sentidos)
-  return messages.filter(m => (m.senderId === senderId && m.receiverId === receiverId) || (m.senderId === receiverId && m.receiverId === senderId));
+  return request(`/messages?user1=${encodeURIComponent(senderId)}&user2=${encodeURIComponent(receiverId)}`);
 };
 
 export const getUsers = async (userType) => {
+  if (API_URL) {
+    const type = normalizeType(userType);
+    // backend exposes /api/users/:userType (contratante|freelancer)
+    // map frontend 'employer' -> 'contratante'
+    const backendType = type === 'employer' ? 'contratante' : type;
+    return request(`/users/${encodeURIComponent(backendType)}`);
+  }
+
   await sleep(60);
   const type = normalizeType(userType);
   const users = loadUsers();
@@ -277,6 +219,10 @@ const saveContracts = (arr) => localStorage.setItem(CONTRACTS_KEY, JSON.stringif
 
 // Projects
 export const createProject = async (ownerId, data) => {
+  if (API_URL) {
+    return request('/projects', { method: 'POST', body: { ownerId, ...data } });
+  }
+
   await sleep(120);
   const arr = loadProjects();
   const id = generateId();
@@ -286,7 +232,53 @@ export const createProject = async (ownerId, data) => {
   return project;
 };
 
+export const applyToProject = async (projectId, userId, message = '') => {
+  if (API_URL) {
+    return request(`/projects/${encodeURIComponent(projectId)}/applications`, { method: 'POST', body: { userId, message } });
+  }
+  await sleep(80);
+  const apps = loadApplications();
+  const exists = apps.find(a => String(a.projectId) === String(projectId) && String(a.userId) === String(userId));
+  if (exists) { const err = new Error('Já inscrito neste projeto'); err.status = 409; throw err; }
+  const application = { id: generateId(), projectId, userId, message, status: 'pending', createdAt: new Date().toISOString() };
+  // store project_applications in localStorage under key 'trampoff_project_applications'
+  const key = 'trampoff_project_applications';
+  try {
+    const raw = localStorage.getItem(key);
+    const arr = raw ? JSON.parse(raw) : [];
+    arr.push(application);
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch (e) {}
+  return application;
+};
+
+export const getProjectApplications = async (projectId) => {
+  if (API_URL) {
+    return request(`/projects/${encodeURIComponent(projectId)}/applications`);
+  }
+  await sleep(60);
+  const key = 'trampoff_project_applications';
+  try { const raw = localStorage.getItem(key); const arr = raw ? JSON.parse(raw) : []; return arr.filter(a => String(a.projectId) === String(projectId)); } catch (e) { return []; }
+};
+
+export const getNotifications = async (userId) => {
+  if (API_URL) return request(`/notifications?userId=${encodeURIComponent(userId)}`);
+  await sleep(60);
+  try { const raw = localStorage.getItem('trampoff_notifications'); return raw ? JSON.parse(raw) : []; } catch (e) { return []; }
+};
+
+export const markNotificationRead = async (notificationId, updates = { read: true }) => {
+  if (API_URL) return request(`/notifications/${encodeURIComponent(notificationId)}`, { method: 'PUT', body: updates });
+  await sleep(20);
+  try { const raw = localStorage.getItem('trampoff_notifications'); const arr = raw ? JSON.parse(raw) : []; const idx = arr.findIndex(n => String(n.id) === String(notificationId)); if (idx === -1) throw new Error('Notification not found'); arr[idx] = { ...arr[idx], ...updates, updatedAt: new Date().toISOString() }; localStorage.setItem('trampoff_notifications', JSON.stringify(arr)); return arr[idx]; } catch (e) { throw e; }
+};
+
 export const getProjects = async (ownerId = null) => {
+  if (API_URL) {
+    const q = ownerId ? `?ownerId=${encodeURIComponent(ownerId)}` : '';
+    return request(`/projects${q}`);
+  }
+
   await sleep(80);
   let arr = loadProjects();
   if (ownerId) arr = arr.filter(p => p.ownerId === ownerId);
@@ -294,6 +286,10 @@ export const getProjects = async (ownerId = null) => {
 };
 
 export const updateProject = async (projectId, updates) => {
+  if (API_URL) {
+    return request(`/projects/${encodeURIComponent(projectId)}`, { method: 'PUT', body: updates });
+  }
+
   await sleep(80);
   const arr = loadProjects();
   const idx = arr.findIndex(p => p.id === projectId);
@@ -304,6 +300,10 @@ export const updateProject = async (projectId, updates) => {
 };
 
 export const deleteProject = async (projectId) => {
+  if (API_URL) {
+    return request(`/projects/${encodeURIComponent(projectId)}`, { method: 'DELETE' });
+  }
+
   await sleep(80);
   let arr = loadProjects();
   arr = arr.filter(p => p.id !== projectId);
@@ -313,21 +313,47 @@ export const deleteProject = async (projectId) => {
 
 // Jobs (vagas)
 export const createJob = async (ownerId, data) => {
+  // mapear `budget` -> `price` (transformar strings como 'R$ 3.000' em número)
+  const parsePrice = (val) => {
+    if (val == null) return 0;
+    if (typeof val === 'number') return val;
+    const s = String(val).replace(/[^0-9,\.]/g, '').replace(/,/g, '.');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const payload = { ownerId, ...data };
+  if (payload.price == null && payload.budget != null) {
+    payload.price = parsePrice(payload.budget);
+  }
+
+  if (API_URL) {
+    return request('/jobs', { method: 'POST', body: payload });
+  }
+
   await sleep(120);
   const arr = loadJobs();
   const id = generateId();
-  const job = { id, ownerId, ...data, createdAt: new Date().toISOString(), status: 'open' };
+  const job = { id, ...payload, createdAt: new Date().toISOString(), status: 'open' };
   arr.push(job);
   saveJobs(arr);
   return job;
 };
 
 export const getJobs = async () => {
+  if (API_URL) {
+    return request('/jobs');
+  }
+
   await sleep(60);
   return loadJobs();
 };
 
 export const updateJob = async (jobId, updates) => {
+  if (API_URL) {
+    return request(`/jobs/${encodeURIComponent(jobId)}`, { method: 'PUT', body: updates });
+  }
+
   await sleep(60);
   const arr = loadJobs();
   const idx = arr.findIndex(j => j.id === jobId);
@@ -338,6 +364,10 @@ export const updateJob = async (jobId, updates) => {
 };
 
 export const deleteJob = async (jobId) => {
+  if (API_URL) {
+    return request(`/jobs/${encodeURIComponent(jobId)}`, { method: 'DELETE' });
+  }
+
   await sleep(60);
   let arr = loadJobs();
   arr = arr.filter(j => j.id !== jobId);
@@ -347,6 +377,10 @@ export const deleteJob = async (jobId) => {
 
 // Applications (candidaturas)
 export const applyToJob = async (jobId, userId, coverLetter = '') => {
+  if (API_URL) {
+    return request(`/jobs/${encodeURIComponent(jobId)}/applications`, { method: 'POST', body: { userId, coverLetter } });
+  }
+
   await sleep(80);
   const apps = loadApplications();
   // evitar duplicata
@@ -360,11 +394,19 @@ export const applyToJob = async (jobId, userId, coverLetter = '') => {
 };
 
 export const getApplicationsForJob = async (jobId) => {
+  if (API_URL) {
+    return request(`/jobs/${encodeURIComponent(jobId)}/applications`);
+  }
+
   await sleep(60);
   return loadApplications().filter(a => a.jobId === jobId);
 };
 
 export const updateApplication = async (applicationId, updates) => {
+  if (API_URL) {
+    return request(`/applications/${encodeURIComponent(applicationId)}`, { method: 'PUT', body: updates });
+  }
+
   await sleep(60);
   const apps = loadApplications();
   const idx = apps.findIndex(a => a.id === applicationId);
@@ -376,6 +418,10 @@ export const updateApplication = async (applicationId, updates) => {
 
 // Contracts
 export const createContract = async ({ jobId, employerId, freelancerId, agreedAt = new Date().toISOString(), price = 0 }) => {
+  if (API_URL) {
+    return request('/contracts', { method: 'POST', body: { jobId, employerId, freelancerId, agreedAt, price } });
+  }
+
   await sleep(120);
   const contracts = loadContracts();
   const contract = { id: generateId(), jobId, employerId, freelancerId, price, status: 'active', agreedAt };
@@ -385,11 +431,19 @@ export const createContract = async ({ jobId, employerId, freelancerId, agreedAt
 };
 
 export const getContractsForUser = async (userId) => {
+  if (API_URL) {
+    return request(`/contracts?userId=${encodeURIComponent(userId)}`);
+  }
+
   await sleep(60);
   return loadContracts().filter(c => c.employerId === userId || c.freelancerId === userId);
 };
 
 export const completeContract = async (contractId) => {
+  if (API_URL) {
+    return request(`/contracts/${encodeURIComponent(contractId)}`, { method: 'PUT', body: { status: 'completed', completedAt: new Date().toISOString() } });
+  }
+
   await sleep(60);
   const contracts = loadContracts();
   const idx = contracts.findIndex(c => c.id === contractId);
@@ -408,6 +462,10 @@ const loadReviews = () => {
 const saveReviews = (arr) => localStorage.setItem(REVIEWS_KEY, JSON.stringify(arr));
 
 export const createReview = async ({ reviewerId, targetUserId, contractId = null, jobId = null, rating = 5, comment = '' }) => {
+  if (API_URL) {
+    return request('/reviews', { method: 'POST', body: { reviewerId, targetUserId, contractId, jobId, rating, comment } });
+  }
+
   await sleep(80);
   const arr = loadReviews();
   const review = { id: generateId(), reviewerId, targetUserId, contractId, jobId, rating, comment, createdAt: new Date().toISOString() };
@@ -417,16 +475,28 @@ export const createReview = async ({ reviewerId, targetUserId, contractId = null
 };
 
 export const getReviewsForUser = async (userId) => {
+  if (API_URL) {
+    return request(`/reviews?userId=${encodeURIComponent(userId)}`);
+  }
+
   await sleep(40);
   return loadReviews().filter(r => r.targetUserId === userId);
 };
 
 export const getReviewsForJob = async (jobId) => {
+  if (API_URL) {
+    return request(`/reviews?jobId=${encodeURIComponent(jobId)}`);
+  }
+
   await sleep(40);
   return loadReviews().filter(r => r.jobId === jobId);
 };
 
 export const getReviewStatsForUser = async (userId) => {
+  if (API_URL) {
+    return request(`/reviews/stats?userId=${encodeURIComponent(userId)}`);
+  }
+
   await sleep(30);
   const reviews = loadReviews().filter(r => r.targetUserId === userId);
   const count = reviews.length;

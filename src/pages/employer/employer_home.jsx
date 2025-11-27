@@ -3,15 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
-import { createJob, getContractsForUser, getJobs, getApplicationsForJob, updateApplication, createContract, getUsers, sendMessage } from '../../services/api';
+import meusContratos from '../../assets/imgs/meus_contratos.png';
+import { createJob, getContractsForUser, getJobs, getApplicationsForJob, updateApplication, createContract, getUsers, sendMessage, getProjectApplications, getProjects, getNotifications, markNotificationRead } from '../../services/api';
 import { useEffect } from 'react';
+import { useAlert } from '../../components/AlertProvider';
+import { usePrompt } from '../../components/PromptProvider';
 
 const EmployerHome = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const alert = useAlert();
+    const prompt = usePrompt();
     const [contracts, setContracts] = useState([]);
     const [jobs, setJobs] = useState([]);
+    const [projectApplications, setProjectApplications] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [projectApplicantsMap, setProjectApplicantsMap] = useState({});
     const [openProposalsJob, setOpenProposalsJob] = useState(null);
     const [proposals, setProposals] = useState([]);
     const [applicants, setApplicants] = useState({});
@@ -20,6 +28,31 @@ const EmployerHome = () => {
         let mounted = true;
         getContractsForUser(user?.id).then(list => { if (mounted) setContracts(list || []); }).catch(() => setContracts([]));
         getJobs().then(list => { if (mounted) setJobs(list || []); }).catch(() => setJobs([]));
+        // load project applications for projects owned by this user
+        (async () => {
+            try {
+                const projects = await getProjects(user?.id);
+                const allApps = [];
+                for (const p of projects) {
+                    const apps = await getProjectApplications(p.id);
+                    apps.forEach(a => allApps.push({ project: p, application: a }));
+                }
+                if (mounted) setProjectApplications(allApps);
+                // map applicant IDs to user objects (freelancers)
+                try {
+                    const allUsers = await getUsers('freelancer');
+                    const map = {};
+                    (allUsers || []).forEach(u => { map[String(u.id)] = u; });
+                    if (mounted) setProjectApplicantsMap(map);
+                } catch (e) {
+                    if (mounted) setProjectApplicantsMap({});
+                }
+            } catch (e) {
+                if (mounted) setProjectApplications([]);
+            }
+        })();
+        // load notifications
+        getNotifications(user?.id).then(list => { if (mounted) setNotifications(list || []); }).catch(() => setNotifications([]));
         return () => { mounted = false };
     }, [user]);
 
@@ -39,16 +72,19 @@ const EmployerHome = () => {
         }
     };
 
-    const handleCreateJob = () => {
-        const title = window.prompt('Título da vaga');
+    const handleCreateJob = async () => {
+        const title = await prompt('Título da vaga');
         if (!title) return;
-        const description = window.prompt('Descrição') || '';
-        const category = window.prompt('Categoria') || '';
-        const budget = window.prompt('Orçamento (ex: R$ 3000)') || '';
-        createJob(user.id, { title, description, category, budget }).then(j => {
+        const description = await prompt('Descrição') || '';
+        const category = await prompt('Categoria') || '';
+        const budget = await prompt({ message: 'Orçamento', title: 'Orçamento', mask: 'money', defaultValue: '' }) || '';
+        try {
+            const j = await createJob(user.id, { title, description, category, budget });
             setJobs(prev => [j, ...prev]);
-            alert('Vaga criada (local)');
-        }).catch(err => alert(err?.message || 'Erro ao criar vaga'));
+            await alert('Vaga criada (local)');
+        } catch (err) {
+            await alert(err?.message || 'Erro ao criar vaga');
+        }
     };
 
     const handleViewProposals = (job) => {
@@ -77,9 +113,9 @@ const EmployerHome = () => {
             const updatedContracts = await getContractsForUser(user.id);
             setContracts(updatedContracts);
             await loadProposals(job.id);
-            alert('Proposta aceita e contrato criado (local)');
+            await alert('Proposta aceita e contrato criado (local)');
         } catch (e) {
-            alert(e?.message || 'Erro ao aceitar proposta');
+            await alert(e?.message || 'Erro ao aceitar proposta');
         }
     };
 
@@ -88,9 +124,9 @@ const EmployerHome = () => {
             await updateApplication(app.id, { status: 'rejected' });
             await sendMessage(user.id, app.userId, `Sua proposta para "${job.title}" foi recusada.`);
             await loadProposals(job.id);
-            alert('Proposta recusada');
+            await alert('Proposta recusada');
         } catch (e) {
-            alert(e?.message || 'Erro ao recusar proposta');
+            await alert(e?.message || 'Erro ao recusar proposta');
         }
     };
 
@@ -106,8 +142,15 @@ const EmployerHome = () => {
 
             <main className="main-content">
                 <section className="welcome-section">
-                    <h1 className="welcome-title">Bem-vindo(a), {user?.name || 'Empregador'}!</h1>
-                    <p className="welcome-subtitle">Gerencie seus projetos e encontre os melhores talentos.</p>
+                    <div className="welcome-content">
+                        <h1 className="welcome-title">Bem-vindo(a), {user?.name || 'Empregador'}!</h1>
+                        <p className="welcome-subtitle">Gerencie seus projetos e encontre os melhores talentos.</p>
+                    </div>
+                        <div className="welcome-illustration">
+                            <div className="hero-illustration">
+                                <img src={meusContratos} alt="Ilustração de contratos e gestão para empregadores" />
+                            </div>
+                        </div>
                 </section>
                 <section>
                     <div style={{ marginBottom: 12 }}>
@@ -119,7 +162,15 @@ const EmployerHome = () => {
                         {contracts.map(c => (
                             <div className="card contract-card" key={c.id}>
                                 <h3 className="card-title">Contrato: {c.jobId}</h3>
-                                <p className="card-description">Freelancer ID: {c.freelancerId} — Orçamento: {c.price}</p>
+                                <p className="card-description">
+                                    Freelancer ID: {c.freelancerId} — Orçamento:{' '}
+                                    {c.price != null
+                                        ? Number(c.price).toLocaleString('pt-BR', {
+                                            style: 'currency',
+                                            currency: 'BRL',
+                                        })
+                                        : 'não informado'}
+                                </p>
                                 <div className="card-meta">
                                     <span>Status: {c.status}</span>
                                     <span>Data: {new Date(c.agreedAt).toLocaleDateString()}</span>
@@ -136,7 +187,15 @@ const EmployerHome = () => {
                                 <p className="card-description">{j.description}</p>
                                 <div className="card-meta">
                                     <span>Categoria: {j.category}</span>
-                                    <span>Orçamento: {j.budget}</span>
+                                    <span>
+                                        Orçamento:{' '}
+                                        {j.budget !== undefined && j.budget !== null && j.budget !== ''
+                                            ? Number(j.budget).toLocaleString('pt-BR', {
+                                                style: 'currency',
+                                                currency: 'BRL',
+                                            })
+                                            : 'a combinar'}
+                                    </span>
                                 </div>
                                 <div style={{ marginTop: 8 }}>
                                     <button className="card-button" onClick={() => handleViewProposals(j)}>{openProposalsJob === j.id ? 'Fechar Propostas' : 'Ver Propostas'}</button>
@@ -157,6 +216,37 @@ const EmployerHome = () => {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        ))}
+                    </div>
+                    <h2 className="section-title">Inscrições em Projetos</h2>
+                    <div className="list-container">
+                        {projectApplications.length === 0 && <p>Nenhuma inscrição em projetos.</p>}
+                        {projectApplications.map(pa => {
+                            const u = projectApplicantsMap[String(pa.application.userId)];
+                            return (
+                                <div key={pa.application.id} className="card project-application-card">
+                                    <h4>{pa.project.title}</h4>
+                                    <p>Usuário: {u ? `${u.name} (${u.email})` : pa.application.userId}</p>
+                                    {u && u.phone && <p>Telefone: {u.phone}</p>}
+                                    <p>Mensagem: {pa.application.message}</p>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <button className="card-button" onClick={() => sendMessage(user.id, pa.application.userId, `Olá, vi sua inscrição para o projeto \"${pa.project.title}\".`)}>Falar com candidato</button>
+                                        <button className="card-button" onClick={async () => { await markNotificationRead(pa.application.id).catch(()=>{}); await alert('Notificação marcada'); }}>Marcar como lida</button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <h2 className="section-title">Notificações</h2>
+                    <div className="list-container">
+                        {notifications.length === 0 && <p>Sem notificações.</p>}
+                        {notifications.map(n => (
+                            <div key={n.id} className="card notification-card">
+                                <p><strong>{n.type}</strong> — {JSON.stringify(n.data)}</p>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    {!n.read && <button className="card-button" onClick={async () => { await markNotificationRead(n.id); n.read = true; setNotifications(s => s.map(x => x.id === n.id ? { ...x, read: true } : x)); }}>Marcar lida</button>}
+                                </div>
                             </div>
                         ))}
                     </div>

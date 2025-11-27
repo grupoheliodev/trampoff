@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
+import trabalhosDisponiveis from '../../assets/imgs/trabalhos_disponiveis.png';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getJobs, applyToJob } from '../../services/api';
+import { useAlert } from '../../components/AlertProvider';
+import { usePrompt } from '../../components/PromptProvider';
 import { useEffect } from 'react';
 
 const FreelancerJobs = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const alert = useAlert();
+    const prompt = usePrompt();
 
     const handleLogout = () => {
         logout();
@@ -23,12 +28,15 @@ const FreelancerJobs = () => {
         return () => { mounted = false };
     }, []);
 
-    const handleApply = (job) => {
-        if (!user) { alert('Faça login para aplicar'); return; }
-        const cover = window.prompt('Digite uma breve mensagem/carta de apresentação (opcional)');
-        applyToJob(job.id, user.id, cover || '').then(() => {
-            alert('Candidatura enviada!');
-        }).catch(err => { alert(err?.message || 'Erro ao aplicar'); });
+    const handleApply = async (job) => {
+        if (!user) { await alert('Faça login para aplicar'); return; }
+        const cover = await prompt('Digite uma breve mensagem/carta de apresentação (opcional)');
+        try {
+            await applyToJob(job.id, user.id, cover || '');
+            await alert('Candidatura enviada!');
+        } catch (err) {
+            await alert(err?.message || 'Erro ao aplicar');
+        }
     };
 
     return (
@@ -39,6 +47,10 @@ const FreelancerJobs = () => {
             <main className="main-content">
                 <section>
                     <h2 className="section-title">Todos os Trabalhos Disponíveis</h2>
+                    {/* Ilustração da página Trabalhos Disponíveis */}
+                    <div className="jobs-hero">
+                        <img src={trabalhosDisponiveis} alt="Trabalhos disponíveis" className="jobs-illustration theme-adaptable" />
+                    </div>
                     <div className="list-container">
                         {jobs.length === 0 && <p>Nenhuma vaga disponível no momento.</p>}
                         {jobs.map(job => (
@@ -47,7 +59,15 @@ const FreelancerJobs = () => {
                                 <p className="card-description">{job.description}</p>
                                 <div className="card-meta">
                                     <span>Categoria: {job.category || 'Geral'}</span>
-                                    <span>Orçamento: {job.budget || 'a combinar'}</span>
+                                    <span>
+                                        Orçamento:{' '}
+                                        {job.budget !== undefined && job.budget !== null && job.budget !== ''
+                                            ? Number(job.budget).toLocaleString('pt-BR', {
+                                                style: 'currency',
+                                                currency: 'BRL',
+                                            })
+                                            : 'a combinar'}
+                                    </span>
                                 </div>
                                 <button className="card-button" onClick={() => handleApply(job)}>Aplicar agora</button>
                             </div>

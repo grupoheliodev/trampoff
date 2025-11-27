@@ -1,0 +1,7 @@
+- Espaço de apresentação pequeno
+- Ver/editar mensagem
+- Mensagem de aplica no modo escuro fica branco
+- Letra mais escura
+- Bug banco bugando pra buscar mensagens
+- Busca com bug
+- Não acessando banco

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { useConfirm } from '../../components/ConfirmProvider';
+import { useAlert } from '../../components/AlertProvider';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 import CardForm from '../../components/CardForm';
 // useAuth already imported above
@@ -14,6 +15,7 @@ const FreelancerSettings = () => {
     const [showModal, setShowModal] = useState(false);
     const [currentPlan, setCurrentPlan] = useState(user?.plan || 'Free');
     const confirm = useConfirm();
+    const alert = useAlert();
 
     useEffect(() => {
         setCurrentPlan(user?.plan || 'Free');
@@ -45,15 +47,11 @@ const FreelancerSettings = () => {
         const amount = prices[plan] || 'R$0,00';
         const ok = await confirm({ title: 'Confirmar compra', message: `Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?` });
         if (!ok) return;
-        // simular cobrança
         const processingMsg = `Processando cobrança de ${amount}...`;
-        // mostrar feedback simples
-        alert(processingMsg);
-        setTimeout(() => {
-            // simular sucesso
-            savePlanInternal(plan);
-            alert(`Pagamento confirmado. Plano ${plan} ativado.`);
-        }, 1200);
+        await alert(processingMsg);
+        // aplicar plano
+        savePlanInternal(plan);
+        await alert(`Pagamento confirmado. Plano ${plan} ativado.`);
     };
 
     // Profile form state and handlers
@@ -69,7 +67,7 @@ const FreelancerSettings = () => {
         setProfilePhoto(user?.photo || perfilFreelancer);
     }, [user]);
 
-    const handleSaveProfile = (e) => {
+    const handleSaveProfile = async (e) => {
         e.preventDefault();
         const updated = { ...user, name: fullName, tagline, location, photo: profilePhoto };
         // salvar em trampoff_users
@@ -85,7 +83,7 @@ const FreelancerSettings = () => {
             }
         } catch (e) { /* noop */ }
         updateUser && updateUser(updated);
-        alert('Perfil atualizado.');
+        await alert('Perfil atualizado.');
     };
 
     // Payment methods
@@ -110,17 +108,17 @@ const FreelancerSettings = () => {
         } catch (e) { console.error('savePaymentMethods', e); }
     };
 
-    const addPaymentMethod = (card) => {
+    const addPaymentMethod = async (card) => {
         try {
             const arr = [...(paymentMethods || [])];
             arr.push(card);
             savePaymentMethods(arr);
             setShowAddCard(false);
-            alert('Cartão adicionado (visual).');
-        } catch (e) { console.error(e); alert('Falha ao adicionar cartão'); }
+            await alert('Cartão adicionado (visual).');
+        } catch (e) { console.error(e); await alert('Falha ao adicionar cartão'); }
     };
 
-    const handleSavePayment = (e) => {
+    const handleSavePayment = async (e) => {
         e.preventDefault();
         const updated = { ...user, billingAddress };
         try {
@@ -135,7 +133,7 @@ const FreelancerSettings = () => {
             }
         } catch (e) { /* noop */ }
         updateUser && updateUser(updated);
-        alert('Informações de pagamento salvas (visual).');
+        await alert('Informações de pagamento salvas (visual).');
     };
 
     const clearLocalData = async () => {
@@ -149,7 +147,7 @@ const FreelancerSettings = () => {
         } catch (e) {
             console.error('Erro ao limpar localStorage', e);
         }
-        alert('Dados locais removidos. Você será deslogado.');
+        await alert('Dados locais removidos. Você será deslogado.');
         logout();
         navigate('/');
     };

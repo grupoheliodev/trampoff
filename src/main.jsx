@@ -7,6 +7,8 @@ import { HashRouter } from 'react-router-dom'; // 👈 De BrowserRouter para Has
 import { AuthProvider } from './context/AuthContext.jsx';
 import App from './App.jsx';
 import ConfirmProvider from './components/ConfirmProvider.jsx';
+import AlertProvider from './components/AlertProvider.jsx';
+import PromptProvider from './components/PromptProvider.jsx';
 
 import './assets/styles/index.css';
 import './assets/styles/animations.css';
@@ -16,9 +18,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     {/* E mude aqui também: */}
     <HashRouter>
       <AuthProvider>
-        <ConfirmProvider>
-          <App />
-        </ConfirmProvider>
+        <AlertProvider>
+          <ConfirmProvider>
+            <PromptProvider>
+              <App />
+            </PromptProvider>
+          </ConfirmProvider>
+        </AlertProvider>
       </AuthProvider>
     </HashRouter>
   </React.StrictMode>

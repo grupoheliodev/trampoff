@@ -25,6 +25,7 @@ import EmployerMessages from './pages/employer/employer_messages.jsx';
 import EmployerProfile from './pages/employer/employer_profile.jsx';
 import EmployerSettings from './pages/employer/employer_settings.jsx';
 import PremiumPage from './pages/premium.jsx';
+import ProjectPage from './pages/projects/ProjectPage.jsx';
 
 const AppRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const AppRoutes = () => {
       <Route path="/employer/messages" element={<EmployerMessages />} />
       <Route path="/employer/profile" element={<EmployerProfile />} />
       <Route path="/employer/settings" element={<EmployerSettings />} />
+      <Route path="/projects/:id" element={<ProjectPage />} />
     </Routes>
   );
 };

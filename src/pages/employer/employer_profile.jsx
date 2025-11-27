@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
@@ -7,7 +7,7 @@ import { getReviewsForUser, getReviewStatsForUser } from '../../services/api';
 import perfilEmployer from '../../assets/imgs/perfil_employer.png';
 
 const EmployerProfile = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUser } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [profilePicture, setProfilePicture] = useState(perfilEmployer);
@@ -33,6 +33,10 @@ const EmployerProfile = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setProfilePicture(reader.result);
+                // Atualiza o contexto global do usuário
+                if (user) {
+                    updateUser({ ...user, photo: reader.result });
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -40,7 +44,7 @@ const EmployerProfile = () => {
 
     return (
         <div>
-            <Header userType="employer" username={user?.name} onProfileClick={() => setShowModal(true)} profilePicture={profilePicture} />
+            <Header userType="employer" username={user?.name} onProfileClick={() => setShowModal(true)} profilePicture={user?.photo || profilePicture} />
             <ProfileModal show={showModal} onClose={() => setShowModal(false)} userType="employer" username={user?.name} onLogout={handleLogout} />
             <main className="main-content">
                 <section className="profile-section">
@@ -48,10 +52,10 @@ const EmployerProfile = () => {
                     <div className="profile-card card">
                         <div className="profile-header">
                             <img src={profilePicture} alt="Ícone do Empregador" className="profile-photo-large" />
+                            <h3 className="profile-name-large">{user?.name || 'Nome da Empresa'}</h3>
                             <input type="file" accept="image/*" onChange={handleProfilePictureChange} style={{ display: 'none' }} id="profile-picture-input" />
                             <label htmlFor="profile-picture-input" className="card-button">Alterar Foto</label>
                             <div className="profile-info">
-                                <h3 className="profile-name-large">{user?.name || 'Nome da Empresa'}</h3>
                                 <p className="profile-tagline">Empresa de Tecnologia | Inovação e Soluções</p>
                                 <p className="profile-location">São Paulo, Brasil</p>
                                 <div className="rating-summary" style={{ marginTop: 8 }}>

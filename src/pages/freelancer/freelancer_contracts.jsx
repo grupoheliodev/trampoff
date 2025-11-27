@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import meusContratos from '../../assets/imgs/meus_contratos.png';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getContractsForUser, completeContract, createReview, getReviewsForUser } from '../../services/api';
 import { useConfirm } from '../../components/ConfirmProvider';
+import { useAlert } from '../../components/AlertProvider';
 import ReviewModal from '../../components/ReviewModal';
 
 const FreelancerContracts = () => {
     const { user, logout } = useAuth();
     const confirm = useConfirm();
+    const alert = useAlert();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [contracts, setContracts] = useState([]);
@@ -41,8 +44,19 @@ const FreelancerContracts = () => {
             <main className="main-content">
                 <section>
                     <h2 className="section-title">Meus Contratos</h2>
+
+                    {contracts.length === 0 && (
+                        <div className="contracts-hero" role="region" aria-label="Sem contratos">
+                            <div className="contracts-hero-left">
+                                <p className="contracts-empty-text">Nenhum contrato encontrado.</p>
+                            </div>
+                            <div className="contracts-hero-right">
+                                <img src={meusContratos} alt="Meus contratos" className="contracts-illustration theme-adaptable" />
+                            </div>
+                        </div>
+                    )}
+
                     <div className="list-container">
-                        {contracts.length === 0 && <p>Nenhum contrato encontrado.</p>}
                         {contracts.map(c => (
                             <div className="card contract-card" key={c.id}>
                                 <h3 className="card-title">Contrato #{c.id}</h3>
@@ -54,10 +68,13 @@ const FreelancerContracts = () => {
                                 {c.status !== 'completed' && <button className="card-button" onClick={async () => {
                                     const ok = await confirm({ title: 'Confirmar', message: 'Marcar contrato como concluído?' });
                                     if (!ok) return;
-                                    completeContract(c.id).then(updated => {
+                                    try {
+                                        const updated = await completeContract(c.id);
                                         setContracts(prev => prev.map(it => it.id === updated.id ? updated : it));
-                                        alert('Contrato finalizado.');
-                                    }).catch(err => alert(err?.message || 'Erro'));
+                                        await alert('Contrato finalizado.');
+                                    } catch (err) {
+                                        await alert(err?.message || 'Erro');
+                                    }
                                 }}>Concluir Contrato</button>}
 
                                 {c.status === 'completed' && !reviewsMap[c.id] && (
@@ -80,9 +97,9 @@ const FreelancerContracts = () => {
                         await createReview({ reviewerId: user.id, targetUserId: currentReviewTarget.targetUserId, contractId: currentReviewTarget.contractId, rating, comment });
                         setReviewsMap(prev => ({ ...prev, [currentReviewTarget.contractId]: true }));
                         setShowReviewModal(false);
-                        alert('Avaliação registrada.');
+                        await alert('Avaliação registrada.');
                     } catch (e) {
-                        alert(e?.message || 'Erro ao registrar avaliação');
+                        await alert(e?.message || 'Erro ao registrar avaliação');
                     }
                 }} />
             </main>

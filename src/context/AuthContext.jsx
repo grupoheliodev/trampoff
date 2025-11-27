@@ -54,6 +54,7 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // ignore in non-browser envs
     }
+
   };
 
   const login = async (email, password) => {
