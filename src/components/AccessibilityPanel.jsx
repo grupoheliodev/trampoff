@@ -7,6 +7,7 @@ const defaultPrefs = {
   highContrast: false,
   reduceMotion: false,
   highlightLinks: true,
+  theme: 'system',
   colorBlindMode: 'none', // none | protanopia | deuteranopia | tritanopia | achromatopsia
 };
 
@@ -33,6 +34,12 @@ function applyPrefs(p) {
   if (p.colorBlindMode && p.colorBlindMode !== 'none') {
     toggleClass(true, `a11y-cvd-${p.colorBlindMode}`);
   }
+
+  // theme handling
+  const themePref = p.theme || 'system';
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const effectiveTheme = themePref === 'system' ? (prefersDark ? 'dark' : 'light') : themePref;
+  root.setAttribute('data-theme', effectiveTheme);
 }
 
 export default function AccessibilityPanel() {
@@ -209,6 +216,26 @@ export default function AccessibilityPanel() {
           >
             <span className="a11y-ico">🔗</span>
             <span className="a11y-label">Destacar Links</span>
+          </button>
+
+          <button
+            className={`a11y-option-btn ${prefs.theme === 'light' ? 'active' : ''}`}
+            aria-pressed={prefs.theme === 'light'}
+            onClick={() => setPrefs(prev => ({ ...prev, theme: prev.theme === 'light' ? 'system' : 'light' }))}
+            title="Modo claro"
+          >
+            <span className="a11y-ico">🌞</span>
+            <span className="a11y-label">Modo Claro</span>
+          </button>
+
+          <button
+            className={`a11y-option-btn ${prefs.theme === 'dark' ? 'active' : ''}`}
+            aria-pressed={prefs.theme === 'dark'}
+            onClick={() => setPrefs(prev => ({ ...prev, theme: prev.theme === 'dark' ? 'system' : 'dark' }))}
+            title="Modo escuro"
+          >
+            <span className="a11y-ico">🌙</span>
+            <span className="a11y-label">Modo Escuro</span>
           </button>
         </div>
 

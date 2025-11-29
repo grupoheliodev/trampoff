@@ -7,10 +7,13 @@ import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const FreelancerRegistration = () => {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const { register, getEmailConfirmationCode, confirmEmail } = useAuth();
     const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirmation: '', phone: '', portfolio: '', cad: '' });
     const [cadError, setCadError] = useState('');
     const [phoneError, setPhoneError] = useState('');
+    const [isConfirmStep, setIsConfirmStep] = useState(false);
+    const [confirmCode, setConfirmCode] = useState('');
+    const [infoMessage, setInfoMessage] = useState('');
 
     const onlyDigits = (v) => (v || '').toString().replace(/\D/g, '');
 
@@ -135,6 +138,26 @@ const FreelancerRegistration = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setRegistrationError('');
+
+        if (isConfirmStep) {
+            try {
+                if (!formData.email) {
+                    setRegistrationError('Informe o e-mail para confirmar.');
+                    return;
+                }
+                if (!confirmCode.trim()) {
+                    setRegistrationError('Informe o código de confirmação recebido.');
+                    return;
+                }
+                await confirmEmail(formData.email, confirmCode.trim());
+                setInfoMessage('E-mail confirmado com sucesso!');
+                navigate('/freelancer/login');
+            } catch (error) {
+                const msg = error?.message || 'Código inválido. Tente novamente.';
+                setRegistrationError(msg);
+            }
+            return;
+        }
         // se campo cad preenchido, garantir validade
         if (formData.cad.trim() !== '' && !isValidCpfCnpj(formData.cad)) {
             setCadError('CPF/CNPJ inválido');
@@ -152,7 +175,13 @@ const FreelancerRegistration = () => {
         }
         try {
             await register({ name: formData.name, email: formData.email, password: formData.password, passwordConfirmation: formData.passwordConfirmation, phone: formData.phone, cad: formData.cad, portfolio: formData.portfolio }, 'freelancer');
-            navigate('/freelancer/home');
+            setIsConfirmStep(true);
+            setInfoMessage('Cadastro realizado! Enviamos um código de confirmação para o seu e-mail (simulado).');
+            try {
+                await getEmailConfirmationCode(formData.email);
+            } catch (e) {
+                // ignore: em modo local o código já é gerado no register
+            }
         } catch (error) {
             // Mostrar mensagem de erro mais útil quando disponível
             const msg = error?.message || 'Erro ao cadastrar. Tente novamente.';
@@ -170,45 +199,76 @@ const FreelancerRegistration = () => {
                 <form id="freelancer-registration-form" className="registration-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="name">Nome Completo</label>
-                        <input type="text" id="name" name="name" onChange={handleChange} placeholder="Diigite seu Nome" required />
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            maxLength={40}
+                            onChange={handleChange}
+                            placeholder="Diigite seu Nome"
+                            required
+                        />
                     </div>
                     <div className="form-group">
                         <label htmlFor="email">E-mail</label>
                         <input type="email" id="email" name="email" placeholder='Digite seu Email' onChange={handleChange} required />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="cad">CPF/CNPJ</label>
-                        <input
-                            type="text"
-                            id="cad"
-                            name="cad"
-                            inputMode="numeric"
-                            value={formData.cad}
-                            onChange={handleCadChange}
-                            placeholder="Digite seu CPF ou CNPJ"
-                            maxLength={18}
-                            required
-                        />
-                        {cadError && <small style={{ color: 'red' }}>{cadError}</small>}
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password">Senha</label>
-                        <input type="password" id="password" name="password" placeholder="Digite sua senha" onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="passwordConfirmation">Confirme a Senha</label>
-                        <input type="password" id="passwordConfirmation" name="passwordConfirmation" placeholder="Repita a senha" onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="phone">Telefone</label>
-                        <input type="text" id="phone" name="phone" inputMode="tel" value={formData.phone} onChange={handlePhoneChange} placeholder="(99) 99999-9999" maxLength={16} required />
-                        {phoneError && <small style={{ color: 'red' }}>{phoneError}</small>}
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="portfolio">Link do Portfólio (opcional)</label>
-                        <input type="url" id="portfolio" name="portfolio" onChange={handleChange} />
-                    </div>
-                    <button type="submit" className="registration-button" disabled={!!cadError}>Cadastrar</button>
+                    {!isConfirmStep && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="cad">CPF/CNPJ</label>
+                                <input
+                                    type="text"
+                                    id="cad"
+                                    name="cad"
+                                    inputMode="numeric"
+                                    value={formData.cad}
+                                    onChange={handleCadChange}
+                                    placeholder="Digite seu CPF ou CNPJ"
+                                    maxLength={18}
+                                    required
+                                />
+                                {cadError && <small style={{ color: 'red' }}>{cadError}</small>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password">Senha</label>
+                                <input type="password" id="password" name="password" placeholder="Digite sua senha" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="passwordConfirmation">Confirme a Senha</label>
+                                <input type="password" id="passwordConfirmation" name="passwordConfirmation" placeholder="Repita a senha" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="phone">Telefone</label>
+                                <input type="text" id="phone" name="phone" inputMode="tel" value={formData.phone} onChange={handlePhoneChange} placeholder="(99) 99999-9999" maxLength={16} required />
+                                {phoneError && <small style={{ color: 'red' }}>{phoneError}</small>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="portfolio">Link do Portfólio (opcional)</label>
+                                <input type="url" id="portfolio" name="portfolio" onChange={handleChange} />
+                            </div>
+                        </>
+                    )}
+
+                    {isConfirmStep && (
+                        <div className="form-group">
+                            <label htmlFor="confirmCode">Código de confirmação</label>
+                            <input
+                                type="text"
+                                id="confirmCode"
+                                name="confirmCode"
+                                value={confirmCode}
+                                onChange={e => setConfirmCode(e.target.value)}
+                                placeholder="Digite o código recebido"
+                                required
+                            />
+                        </div>
+                    )}
+
+                    <button type="submit" className="registration-button" disabled={!!cadError}>
+                        {isConfirmStep ? 'Confirmar e-mail' : 'Cadastrar'}
+                    </button>
+                    {infoMessage && <p style={{ color: 'var(--bali-hai)', marginTop: 8 }}>{infoMessage}</p>}
                     {registrationError && <p style={{ color: 'red', marginTop: 8 }}>{registrationError}</p>}
                 </form>
                  <Link to="/freelancer/login" className="login_paragraph"><p>Já tem uma conta? Faça Login</p></Link>

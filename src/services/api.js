@@ -85,6 +85,12 @@ const normalizeType = (t) => {
   return t;
 };
 
+const USERS_KEY = 'trampoff_users';
+const loadUsers = () => {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch (e) { return []; }
+};
+const saveUsers = (arr) => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+
 export const register = async (userData, userType) => {
   // If an API URL is configured, call the backend; otherwise use localStorage fallback
   if (API_URL) {
@@ -127,6 +133,21 @@ export const register = async (userData, userType) => {
 
   users.push(newUser);
   saveUsers(users);
+  // generate email confirmation code in local mode
+  if (!API_URL && newUser.email) {
+    const confirmations = loadEmailConfirmations();
+    const code = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+    const record = {
+      email: newUser.email.toLowerCase(),
+      code,
+      confirmed: false,
+      createdAt: new Date().toISOString(),
+    };
+    const existingIdx = confirmations.findIndex(c => c.email === record.email);
+    if (existingIdx !== -1) confirmations[existingIdx] = record; else confirmations.push(record);
+    saveEmailConfirmations(confirmations);
+    console.info('[TrampOff] Código de confirmação de e-mail para', record.email, '=>', code);
+  }
   // Dispara evento customizado para atualização instantânea em todas as abas
   try {
     window.dispatchEvent(new CustomEvent('trampoff:users-updated', { detail: { user: newUser } }));
@@ -154,6 +175,89 @@ export const login = async (email, password) => {
   }
   const token = btoa(`${found.email}:${Date.now()}`);
   return { token, user: { ...found, password: undefined } };
+};
+
+export const resetPassword = async (email, newPassword) => {
+  if (API_URL) {
+    return request('/reset-password', {
+      method: 'POST',
+      body: { email, newPassword },
+    });
+  }
+
+  await sleep(100);
+  const users = loadUsers();
+  const idx = users.findIndex(
+    (u) => (u.email || '').toLowerCase() === (email || '').toLowerCase()
+  );
+
+  if (idx === -1) {
+    const err = new Error('E-mail não encontrado');
+    err.status = 404;
+    throw err;
+  }
+
+  users[idx].password = newPassword;
+  saveUsers(users);
+
+  try {
+    window.dispatchEvent(
+      new CustomEvent('trampoff:users-updated', { detail: { user: users[idx] } })
+    );
+  } catch (e) {}
+
+  return { success: true };
+};
+
+export const getEmailConfirmationCode = async (email) => {
+  if (API_URL) {
+    return request('/email/resend-confirmation', { method: 'POST', body: { email } });
+  }
+  await sleep(80);
+  const confirmations = loadEmailConfirmations();
+  const lower = (email || '').toLowerCase();
+  const existing = confirmations.find(c => c.email === lower);
+  if (!existing) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const record = { email: lower, code, confirmed: false, createdAt: new Date().toISOString() };
+    confirmations.push(record);
+    saveEmailConfirmations(confirmations);
+    console.info('[TrampOff] Código de confirmação de e-mail para', record.email, '=>', code);
+    return { code };
+  }
+  console.info('[TrampOff] Código de confirmação existente para', existing.email, '=>', existing.code);
+  return { code: existing.code };
+};
+
+export const confirmEmail = async (email, code) => {
+  if (API_URL) {
+    return request('/email/confirm', { method: 'POST', body: { email, code } });
+  }
+  await sleep(80);
+  const lower = (email || '').toLowerCase();
+  const confirmations = loadEmailConfirmations();
+  const idx = confirmations.findIndex(c => c.email === lower);
+  if (idx === -1) {
+    const err = new Error('Nenhum código encontrado para este e-mail.');
+    err.status = 404;
+    throw err;
+  }
+  if (String(confirmations[idx].code) !== String(code || '').trim()) {
+    const err = new Error('Código de confirmação inválido.');
+    err.status = 400;
+    throw err;
+  }
+  confirmations[idx].confirmed = true;
+  saveEmailConfirmations(confirmations);
+
+  const users = loadUsers();
+  const uIdx = users.findIndex(u => (u.email || '').toLowerCase() === lower);
+  if (uIdx !== -1) {
+    users[uIdx] = { ...users[uIdx], emailVerified: true };
+    saveUsers(users);
+  }
+
+  return { success: true };
 };
 
 export const getStatus = async () => {
@@ -191,11 +295,17 @@ export const getUsers = async (userType) => {
   return users.filter(u => u.userType === type).map(u => ({ ...u, password: undefined }));
 };
 
-/* Projects / Jobs / Applications / Contracts (localStorage-backed) */
+/* Email confirmation (local mode) + Projects / Jobs / Applications / Contracts (localStorage-backed) */
+const EMAIL_CONFIRMATION_KEY = 'trampoff_email_confirmations';
 const PROJECTS_KEY = 'trampoff_projects';
 const JOBS_KEY = 'trampoff_jobs';
 const APPLICATIONS_KEY = 'trampoff_applications';
 const CONTRACTS_KEY = 'trampoff_contracts';
+
+const loadEmailConfirmations = () => {
+  try { return JSON.parse(localStorage.getItem(EMAIL_CONFIRMATION_KEY)) || []; } catch (e) { return []; }
+};
+const saveEmailConfirmations = (arr) => localStorage.setItem(EMAIL_CONFIRMATION_KEY, JSON.stringify(arr));
 
 const loadProjects = () => {
   try { return JSON.parse(localStorage.getItem(PROJECTS_KEY)) || []; } catch (e) { return []; }
@@ -216,6 +326,41 @@ const loadContracts = () => {
   try { return JSON.parse(localStorage.getItem(CONTRACTS_KEY)) || []; } catch (e) { return []; }
 };
 const saveContracts = (arr) => localStorage.setItem(CONTRACTS_KEY, JSON.stringify(arr));
+
+export const socialLogin = async (provider, userType = 'freelancer') => {
+  if (API_URL) {
+    return request('/social-login', {
+      method: 'POST',
+      body: { provider, userType },
+    });
+  }
+
+  await sleep(80);
+  const type = normalizeType(userType);
+  const users = loadUsers();
+  const email = `${type}_${provider.toLowerCase()}@example.com`;
+  let user = users.find(u => (u.email || '').toLowerCase() === email.toLowerCase());
+
+  if (!user) {
+    user = {
+      id: generateId(),
+      name: type === 'freelancer' ? 'Freelancer (Google)' : 'Empresa (Google)',
+      email,
+      password: '',
+      userType: type,
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+    };
+    users.push(user);
+    saveUsers(users);
+    try {
+      window.dispatchEvent(new CustomEvent('trampoff:users-updated', { detail: { user } }));
+    } catch (e) {}
+  }
+
+  const token = btoa(`${user.email}:${Date.now()}`);
+  return { token, user: { ...user, password: undefined } };
+};
 
 // Projects
 export const createProject = async (ownerId, data) => {

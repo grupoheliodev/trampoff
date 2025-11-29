@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, register as apiRegister } from '../services/api';
+import { login as apiLogin, register as apiRegister, resetPassword as apiResetPassword, getEmailConfirmationCode as apiGetEmailConfirmationCode, confirmEmail as apiConfirmEmail, socialLogin as apiSocialLogin } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -62,8 +62,25 @@ export function AuthProvider({ children }) {
     handleAuth(data);
   };
 
+  const resetPassword = async (email, newPassword) => {
+    return apiResetPassword(email, newPassword);
+  };
+
+  const getEmailConfirmationCode = async (email) => {
+    return apiGetEmailConfirmationCode(email);
+  };
+
+  const confirmEmail = async (email, code) => {
+    return apiConfirmEmail(email, code);
+  };
+
   const register = async (userData, type) => {
     const data = await apiRegister(userData, type);
+    handleAuth(data);
+  };
+
+  const socialLogin = async (provider, type) => {
+    const data = await apiSocialLogin(provider, type);
     handleAuth(data);
   };
 
@@ -75,7 +92,7 @@ export function AuthProvider({ children }) {
     setUserType(null);
   };
 
-  const value = { user, userType, token, login, register, logout, updateUser };
+  const value = { user, userType, token, login, register, logout, updateUser, resetPassword, getEmailConfirmationCode, confirmEmail, socialLogin };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

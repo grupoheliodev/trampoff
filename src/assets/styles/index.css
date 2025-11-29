@@ -860,6 +860,37 @@ input:focus, textarea:focus {
     border-radius: 20px;
 }
 
+/* Layout horizontal para telas de login */
+.login-horizontal {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 2.5rem;
+}
+
+.login-visual {
+    flex: 1 1 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    padding-right: 1.5rem;
+}
+
+.login-form {
+    flex: 1 1 55%;
+}
+
+.login-side-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
 .logo-large, .logo-small {
     width: 180px;
     height: auto;
@@ -882,22 +913,44 @@ input:focus, textarea:focus {
     margin-bottom: 3rem;
 }
 
-.selection-options {
+.selection-page .selection-options, .selection-options {
     display: flex;
     justify-content: center;
+    align-items: stretch;
+    gap: 2.5rem;
+    flex-wrap: nowrap;
+    flex-direction: row !important;
+}
+
+/* Quando estivermos na rota inicial, garante horizontal via classe global */
+.selection-horizontal .selection-options {
+    display: flex;
+    flex-direction: row !important;
+    justify-content: center;
     gap: 2rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+}
+
+/* Explicit row class for the initial selection container */
+.selection-row {
+    display: flex;
+    flex-direction: row !important;
+    justify-content: center;
+    align-items: stretch;
+    gap: 2rem;
+    flex-wrap: nowrap;
 }
 
 .selection-card {
     background-color: rgba(64, 67, 91, 0.5);
     border-radius: 10px;
     padding: 2rem;
-    width: 100%;
+    width: auto;
+    flex: 0 0 300px;
     max-width: 300px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
 }
@@ -962,6 +1015,48 @@ input:focus, textarea:focus {
     color: var(--bali-hai);
     font-weight: bold;
     margin-bottom: 0.5rem;
+}
+
+.password-group .password-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.password-toggle {
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    border: none;
+    background-color: var(--saffron);
+    color: var(--big-stone);
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.password-toggle:hover {
+    filter: brightness(0.9);
+}
+
+.link-button.forgot-password-link {
+    margin-top: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--saffron);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+.social-login-button {
+    margin-top: 1rem;
+    background-color: #ffffff;
+    color: var(--big-stone);
+    border: 1px solid var(--bali-hai);
+}
+
+.social-login-button:hover {
+    background-color: #f3f4f6;
 }
 
 .registration-button {
@@ -1583,6 +1678,7 @@ input:focus, textarea:focus {
     .selection-options {
         flex-direction: column;
         align-items: center;
+        gap: 1.5rem;
     }
 
     .selection-card {
@@ -1592,6 +1688,23 @@ input:focus, textarea:focus {
 
     .registration-container {
         padding: 1.5rem;
+    }
+
+    /* Empilha conteúdo do login em telas pequenas */
+    .login-horizontal {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .login-visual {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        padding-bottom: 1.5rem;
+    }
+
+    .login-form {
+        width: 100%;
     }
 
     .profile-header {

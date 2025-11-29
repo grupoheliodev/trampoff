@@ -7,10 +7,13 @@ import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const EmployerRegistration = () => {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const { register, getEmailConfirmationCode, confirmEmail } = useAuth();
     const [formData, setFormData] = useState({ company_name: '', email: '', password: '', passwordConfirmation: '', phone: '', cnpj: '', description: '' });
     const [cnpjError, setCnpjError] = useState('');
     const [phoneError, setPhoneError] = useState('');
+    const [isConfirmStep, setIsConfirmStep] = useState(false);
+    const [confirmCode, setConfirmCode] = useState('');
+    const [infoMessage, setInfoMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -102,6 +105,27 @@ const EmployerRegistration = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setRegistrationError('');
+
+        if (isConfirmStep) {
+            try {
+                if (!formData.email) {
+                    setRegistrationError('Informe o e-mail para confirmar.');
+                    return;
+                }
+                if (!confirmCode.trim()) {
+                    setRegistrationError('Informe o código de confirmação recebido.');
+                    return;
+                }
+                await confirmEmail(formData.email, confirmCode.trim());
+                setInfoMessage('E-mail confirmado com sucesso!');
+                navigate('/employer/login');
+            } catch (error) {
+                const msg = error?.message || 'Código inválido. Tente novamente.';
+                setRegistrationError(msg);
+            }
+            return;
+        }
+
         // validar CNPJ
         if (!formData.cnpj || !isValidCNPJ(formData.cnpj)) {
             setCnpjError('CNPJ inválido');
@@ -121,7 +145,13 @@ const EmployerRegistration = () => {
 
         try {
             await register({ name: formData.company_name, email: formData.email, password: formData.password, passwordConfirmation: formData.passwordConfirmation, companyName: formData.company_name, phone: formData.phone, cnpj: formData.cnpj, description: formData.description }, 'contratante');
-            navigate('/employer/home');
+            setIsConfirmStep(true);
+            setInfoMessage('Cadastro realizado! Enviamos um código de confirmação para o seu e-mail (simulado).');
+            try {
+                await getEmailConfirmationCode(formData.email);
+            } catch (err) {
+                // ignore: em modo local o código já foi gerado
+            }
         } catch (error) {
             const msg = error?.message || 'Erro ao cadastrar. Tente novamente.';
             setRegistrationError(msg);
@@ -138,35 +168,66 @@ const EmployerRegistration = () => {
                 <form className="registration-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="company_name">Nome da Empresa</label>
-                        <input type="text" id="company_name" name="company_name" onChange={handleChange} required />
+                        <input
+                            type="text"
+                            id="company_name"
+                            name="company_name"
+                            maxLength={40}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                     <div className="form-group">
                         <label htmlFor="email">E-mail</label>
                         <input type="email" id="email" name="email" onChange={handleChange} required />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="cnpj">CNPJ</label>
-                        <input type="text" id="cnpj" name="cnpj" inputMode="numeric" value={formData.cnpj} onChange={handleCnpjChange} placeholder="Digite o CNPJ" maxLength={18} required />
-                        {cnpjError && <small style={{ color: 'red' }}>{cnpjError}</small>}
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password">Senha</label>
-                        <input type="password" id="password" name="password" onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="passwordConfirmation">Confirme a Senha</label>
-                        <input type="password" id="passwordConfirmation" name="passwordConfirmation" onChange={handleChange} required />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="phone">Telefone</label>
-                        <input type="text" id="phone" name="phone" inputMode="tel" value={formData.phone} onChange={handlePhoneChange} placeholder="(99) 99999-9999" maxLength={16} required />
-                        {phoneError && <small style={{ color: 'red' }}>{phoneError}</small>}
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="description">Resumo da Empresa</label>
-                        <textarea id="description" name="description" rows="4" onChange={handleChange}></textarea>
-                    </div>
-                    <button type="submit" className="registration-button">Cadastrar</button>
+
+                    {!isConfirmStep && (
+                        <>
+                            <div className="form-group">
+                                <label htmlFor="cnpj">CNPJ</label>
+                                <input type="text" id="cnpj" name="cnpj" inputMode="numeric" value={formData.cnpj} onChange={handleCnpjChange} placeholder="Digite o CNPJ" maxLength={18} required />
+                                {cnpjError && <small style={{ color: 'red' }}>{cnpjError}</small>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password">Senha</label>
+                                <input type="password" id="password" name="password" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="passwordConfirmation">Confirme a Senha</label>
+                                <input type="password" id="passwordConfirmation" name="passwordConfirmation" onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="phone">Telefone</label>
+                                <input type="text" id="phone" name="phone" inputMode="tel" value={formData.phone} onChange={handlePhoneChange} placeholder="(99) 99999-9999" maxLength={16} required />
+                                {phoneError && <small style={{ color: 'red' }}>{phoneError}</small>}
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="description">Resumo da Empresa</label>
+                                <textarea id="description" name="description" rows="4" onChange={handleChange}></textarea>
+                            </div>
+                        </>
+                    )}
+
+                    {isConfirmStep && (
+                        <div className="form-group">
+                            <label htmlFor="confirmCode">Código de confirmação</label>
+                            <input
+                                type="text"
+                                id="confirmCode"
+                                name="confirmCode"
+                                value={confirmCode}
+                                onChange={e => setConfirmCode(e.target.value)}
+                                placeholder="Digite o código recebido"
+                                required
+                            />
+                        </div>
+                    )}
+
+                    <button type="submit" className="registration-button">
+                        {isConfirmStep ? 'Confirmar e-mail' : 'Cadastrar'}
+                    </button>
+                    {infoMessage && <p style={{ color: 'var(--bali-hai)', marginTop: 8 }}>{infoMessage}</p>}
                     {registrationError && <p style={{ color: 'red', marginTop: 8 }}>{registrationError}</p>}
                 </form>
                 <Link to="/employer/login" className="login_paragraph"><p>Já tem uma conta? Faça Login</p></Link>

@@ -68,7 +68,7 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         return () => { mounted = false; };
     }, [user]);
 
-    // debounce search across users and jobs
+    // debounce search across backend unified search (users, jobs, projects, messages)
     useEffect(() => {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (!query || query.trim().length < 2) {
@@ -77,18 +77,15 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         }
         debounceRef.current = setTimeout(async () => {
             try {
-                const q = query.trim().toLowerCase();
-                const [users, jobs] = await Promise.all([
-                    getUsers().catch(() => []),
-                    getJobs().catch(() => [])
-                ]);
-                const userResults = (users || [])
-                    .filter(u => (u.name || u.email || '').toLowerCase().includes(q))
-                    .map(u => ({ type: 'user', item: u, role: u.role || (u.userType === 'freelancer' ? 'Freelancer' : 'Empregador') }));
-                const jobResults = (jobs || [])
-                    .filter(j => (j.title || '').toLowerCase().includes(q))
-                    .map(j => ({ type: 'job', item: j }));
-                setResults([...userResults, ...jobResults]);
+                const q = query.trim();
+                const resp = await fetch(`http://localhost:3000/api/search?q=${encodeURIComponent(q)}`);
+                const data = await resp.json();
+                const list = [];
+                for (const u of (data.users||[])) list.push({ type: 'user', item: u, role: u.role || (u.userType === 'freelancer' ? 'Freelancer' : 'Empregador') });
+                for (const j of (data.jobs||[])) list.push({ type: 'job', item: j });
+                for (const p of (data.projects||[])) list.push({ type: 'project', item: p });
+                for (const m of (data.messages||[])) list.push({ type: 'message', item: m });
+                setResults(list);
                 setOpen(true);
             } catch (e) {
                 setResults([]);
@@ -259,16 +256,38 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                                         <li>Nenhum resultado encontrado</li>
                                     )}
                                     {results.map((r, idx) => (
-                                        <li key={idx} onClick={() => r.type === 'user' ? handleSelectUser(r.item) : handleSelectJob(r.item)}>
-                                            {r.type === 'user' ? (
+                                        <li key={idx} onClick={() => {
+                                            if (r.type === 'user') return handleSelectUser(r.item);
+                                            if (r.type === 'job') return handleSelectJob(r.item);
+                                            if (r.type === 'project') { navigate(isFreelancer ? '/freelancer/projects' : '/employer/home'); setOpen(false); setQuery(''); return; }
+                                            if (r.type === 'message') {
+                                                const otherId = String(r.item.senderId) === String(user?.id) ? r.item.receiverId : r.item.senderId;
+                                                const base = isFreelancer ? '/freelancer/messages' : '/employer/messages';
+                                                navigate(`${base}?userId=${encodeURIComponent(otherId)}`);
+                                                setOpen(false); setQuery(''); return; }
+                                        }}>
+                                            {r.type === 'user' && (
                                                 <div>
                                                     <strong>{r.item.name || r.item.email}</strong>
                                                     <div className="result-meta">{r.role}</div>
                                                 </div>
-                                            ) : (
+                                            )}
+                                            {r.type === 'job' && (
                                                 <div>
                                                     <strong>{r.item.title}</strong>
                                                     <div className="result-meta">{r.item.description}</div>
+                                                </div>
+                                            )}
+                                            {r.type === 'project' && (
+                                                <div>
+                                                    <strong>{r.item.title}</strong>
+                                                    <div className="result-meta">{r.item.description}</div>
+                                                </div>
+                                            )}
+                                            {r.type === 'message' && (
+                                                <div>
+                                                    <strong>Mensagem</strong>
+                                                    <div className="result-meta">{String(r.item.content).slice(0,80)}</div>
                                                 </div>
                                             )}
                                         </li>

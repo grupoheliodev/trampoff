@@ -44,3 +44,13 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Forçar layout horizontal dos cards na tela inicial
+function applySelectionLayout() {
+  try {
+    const isIndex = !window.location.hash || window.location.hash === '#/' || window.location.hash === '#';
+    document.documentElement.classList.toggle('selection-horizontal', !!isIndex);
+  } catch (e) {}
+}
+applySelectionLayout();
+window.addEventListener('hashchange', applySelectionLayout);

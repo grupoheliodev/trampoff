@@ -15,7 +15,7 @@ const Index = () => {
                 <h1 className="selection-title">Como você quer usar a plataforma?</h1>
                 <p className="selection-subtitle">TrampOff conecta freelancers e empregadores em contratos seguros, com chat integrado e gestão simples de projetos e pagamentos.</p>
 
-                <div className="selection-options">
+                <div className="selection-options selection-row">
                     <div className="selection-card">
                         <ThemeAwareImage darkSrc={freelancerIcon} lightSrc={freelancerIcon} className="card-icon theme-adaptable" alt="Ícone Freelancer" />
                         <h2 className="card-title">Sou um Freelancer</h2>
