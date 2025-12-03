@@ -1,0 +1,744 @@
+/* ==========================================================================
+   1. Configurações Globais e Variáveis
+   ========================================================================== */
+:root {
+    --saffron-rgb: 246, 193, 53;
+    --big-stone-rgb: 19, 24, 58;
+    --walnut-rgb: 112, 74, 28;
+    --storm-gray-rgb: 102, 107, 132;
+    --cedar-rgb: 52, 31, 19;
+    --rope-rgb: 141, 90, 29;
+    --kumera-rgb: 127, 94, 36;
+    --gun-powder-rgb: 64, 67, 91;
+    --bali-hai-rgb: 132, 149, 169;
+    --regent-gray-rgb: 127, 138, 165;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(var(--big-stone-rgb), 1);
+    color: rgba(var(--bali-hai-rgb), 1);
+}
+
+a {
+    text-decoration: none;
+    text-underline-offset: none;
+}
+
+/* ==========================================================================
+   2. Layout Principal e Cabeçalho
+   ========================================================================== */
+.main-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-header {
+    background-color: rgba(var(--big-stone-rgb), 1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    border-bottom: 2px solid rgba(var(--gun-powder-rgb), 1);
+    flex-wrap: wrap;
+}
+
+.logo-container {
+    padding-left: 20px;
+}
+
+.logo {
+    height: 150px;
+    border-radius: 50%;
+}
+
+.main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.main-nav a {
+    color: rgba(var(--bali-hai-rgb), 1);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    color: rgba(var(--saffron-rgb), 1);
+}
+
+.search-profile-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-bar {
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: rgba(var(--gun-powder-rgb), 1);
+}
+
+.search-bar input {
+    border: none;
+    padding: 0.5rem 1rem;
+    background: none;
+    color: rgba(var(--bali-hai-rgb), 1);
+    outline: none;
+    width: 100%;
+}
+
+.search-bar button {
+    background-color: rgba(var(--saffron-rgb), 1);
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: rgba(var(--big-stone-rgb), 1);
+}
+
+.profile-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-name {
+    font-weight: bold;
+    color: rgba(var(--bali-hai-rgb), 1);
+}
+
+.profile-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--saffron-rgb), 1);
+    overflow: hidden;
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* ==========================================================================
+   3. Estilos de Seção e Títulos
+   ========================================================================== */
+.welcome-section {
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.welcome-title {
+    color: rgba(var(--saffron-rgb), 1);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    color: rgba(var(--regent-gray-rgb), 1);
+}
+
+.section-title {
+    color: rgba(var(--bali-hai-rgb), 1);
+    font-size: 1.8rem;
+    border-bottom: 2px solid rgba(var(--gun-powder-rgb), 1);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ==========================================================================
+   4. Componentes de Card
+   ========================================================================== */
+.card {
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    color: rgba(var(--saffron-rgb), 1);
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.card-description {
+    color: rgba(var(--regent-gray-rgb), 1);
+    flex-grow: 1;
+}
+
+.card-meta {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    gap: 0.5rem;
+    color: rgba(var(--bali-hai-rgb), 1);
+    font-size: 0.9rem;
+}
+
+.card-button {
+    background-color: rgba(var(--saffron-rgb), 1);
+    color: rgba(var(--big-stone-rgb), 1);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1.5rem;
+}
+
+.card-button:hover {
+    background-color: rgba(var(--saffron-rgb), 0.8);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   5. Página de Seleção e Registro
+   ========================================================================== */
+.selection-page, .registration-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.selection-container, .registration-container {
+    text-align: center;
+    max-width: 800px;
+    padding: 2rem;
+    width: 100%;
+}
+
+.logo-large {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    margin-bottom: -4rem;
+    margin-top: -4rem;
+}
+
+.selection-title {
+    color: rgba(var(--saffron-rgb), 1);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.selection-subtitle {
+    font-size: 1.1rem;
+    color: rgba(var(--regent-gray-rgb), 1);
+    margin-bottom: 3rem;
+}
+
+.selection-options {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.selection-card {
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 10px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.selection-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+}
+
+.selection-button {
+    background-color: rgba(var(--saffron-rgb), 1);
+    color: rgba(var(--big-stone-rgb), 1);
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 1.5rem;
+}
+
+.selection-button:hover {
+    background-color: rgba(var(--saffron-rgb), 0.8);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   6. Formulários de Registro e Login
+   ========================================================================== */
+.registration-container {
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.logo-small {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin-bottom: -4rem;
+    margin-top: -4rem;
+}
+
+.registration-title {
+    color: rgba(var(--saffron-rgb), 1);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.registration-subtitle {
+    color: rgba(var(--regent-gray-rgb), 1);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    color: rgba(var(--bali-hai-rgb), 1);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    background-color: rgba(var(--big-stone-rgb), 1);
+    border: 1px solid rgba(var(--gun-powder-rgb), 1);
+    border-radius: 5px;
+    padding: 0.8rem;
+    color: rgba(var(--bali-hai-rgb), 1);
+    outline: none;
+    transition: border-color 0.3s;
+    width: auto;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: rgba(var(--saffron-rgb), 1);
+}
+
+.registration-button {
+    background-color: rgba(var(--saffron-rgb), 1);
+    color: rgba(var(--big-stone-rgb), 1);
+    border: none;
+    padding: 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.registration-button:hover {
+    background-color: rgba(var(--saffron-rgb), 0.8);
+    transform: translateY(-2px);
+}
+
+.login_paragraph p {
+    color: rgba(var(--regent-gray-rgb), 1);
+}
+
+.login_paragraph a {
+    color: rgba(var(--saffron-rgb), 1);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login_paragraph p:hover {
+    color: rgba(var(--saffron-rgb), 1);
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* ==========================================================================
+   7. Página de Perfil
+   ========================================================================== */
+.profile-card {
+    padding: 2rem;
+    align-items: center;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.profile-photo-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid rgba(var(--saffron-rgb), 1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.profile-photo-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    text-align: center;
+}
+
+.profile-name-large {
+    color: rgba(var(--saffron-rgb), 1);
+    font-size: 2rem;
+    margin: 0;
+}
+
+.profile-tagline, .profile-location {
+    color: rgba(var(--regent-gray-rgb), 1);
+    margin: 0.5rem 0;
+}
+
+.profile-details {
+    width: 100%;
+    text-align: left;
+}
+
+.profile-bio {
+    color: rgba(var(--bali-hai-rgb), 1);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.profile-section-details {
+    margin-top: 1.5rem;
+}
+
+.profile-section-details h4 {
+    color: rgba(var(--saffron-rgb), 1);
+    border-bottom: 1px solid rgba(var(--gun-powder-rgb), 1);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skills-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.skills-list li {
+    background-color: rgba(var(--gun-powder-rgb), 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: rgba(var(--bali-hai-rgb), 1);
+}
+
+.project-item {
+    background-color: rgba(var(--gun-powder-rgb), 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   8. Página de Mensagens
+   ========================================================================== */
+.messages-container {
+    display: flex;
+    gap: 1rem;
+    height: 70vh;
+}
+
+.message-list {
+    flex: 1;
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.chat-box {
+    flex: 2;
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.chat-input {
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--bali-hai-rgb), 0.2);
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 0.8rem;
+    border-radius: 20px;
+    border: none;
+    background-color: rgba(var(--big-stone-rgb), 1);
+    color: rgba(var(--bali-hai-rgb), 1);
+}
+
+.chat-input button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    border: none;
+    background-color: rgba(var(--saffron-rgb), 1);
+    color: rgba(var(--big-stone-rgb), 1);
+    cursor: pointer;
+}
+
+
+/* ==========================================================================
+   9. Modal de Perfil
+   ========================================================================== */
+.profile-modal {
+    display: none;
+    position: fixed;
+    z-index: 3000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation-duration: 0.3s;
+}
+
+.profile-modal.fade-in {
+    animation-name: fadeIn;
+}
+
+.profile-modal.fade-out {
+    animation-name: fadeOut;
+}
+
+.profile-modal-content {
+    background-color: rgba(var(--gun-powder-rgb), 1);
+    margin: 50% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 300px;
+    position: relative;
+    text-align: center;
+}
+
+.close-button {
+    color: rgba(var(--regent-gray-rgb), 1);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: rgba(var(--saffron-rgb), 1);
+    text-decoration: none;
+}
+
+.modal-profile-header {
+    border-bottom: 1px solid rgba(var(--bali-hai-rgb), 0.2);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-profile-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--saffron-rgb), 1);
+    object-fit: cover;
+}
+
+.modal-profile-name {
+    font-size: 1.5rem;
+    color: rgba(var(--saffron-rgb), 1);
+    margin: 10px 0 5px 0;
+}
+
+.modal-profile-role {
+    font-size: 0.9rem;
+    color: rgba(var(--regent-gray-rgb), 1);
+}
+
+.modal-profile-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-profile-nav li a {
+    display: block;
+    padding: 10px 0;
+    text-decoration: none;
+    color: rgba(var(--bali-hai-rgb), 1);
+    transition: color 0.3s;
+}
+
+.modal-profile-nav li a:hover {
+    color: rgba(var(--saffron-rgb), 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* ==========================================================================
+   10. Media Queries para Responsividade
+   ========================================================================== */
+
+/* Telas menores que 992px (Tablets) */
+@media (max-width: 992px) {
+    .main-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .main-nav ul {
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .search-profile-container {
+        justify-content: center;
+    }
+
+    .messages-container {
+        flex-direction: column;
+        height: auto;
+    }
+}
+
+/* Telas menores que 768px (Celulares) */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-profile-container {
+        flex-direction: column;
+    }
+
+    .search-bar input {
+        width: 100%;
+        text-align: center;
+    }
+
+    .welcome-title {
+        font-size: 2rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+
+    .selection-options {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .selection-card {
+        width: 90%;
+    }
+
+    .logo-large {
+        width: 200px;
+        height: 200px;
+        margin-bottom: -3rem;
+        margin-top: -3rem;
+    }
+
+    .logo-small {
+        width: 150px;
+        height: 150px;
+        margin-bottom: -3rem;
+        margin-top: -3rem;
+    }
+
+    .registration-container {
+        padding: 1.5rem;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}

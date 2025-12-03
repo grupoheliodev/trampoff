@@ -1,0 +1,76 @@
+/* ==========================================================================
+   Animações Globais (Versão Otimizada)
+   ========================================================================== */
+
+/* Animação genérica para elementos aparecerem (fade in + slide up) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Aplicação das animações */
+.main-header,
+.main-content,
+.selection-container,
+.registration-container {
+    animation: fadeInUp 0.7s ease-out forwards;
+}
+
+/* Atraso para o conteúdo principal, para que apareça depois do header */
+.main-content,
+.selection-container,
+.registration-container {
+    animation-delay: 0.2s;
+    opacity: 0; /* Começa invisível para a animação funcionar */
+}
+
+/* Animação staggered (em cascata) para os cards */
+.list-container .card {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.list-container .card:nth-child(1) { animation-delay: 0.3s; }
+.list-container .card:nth-child(2) { animation-delay: 0.4s; }
+.list-container .card:nth-child(3) { animation-delay: 0.5s; }
+/* Adicione mais se necessário */
+
+
+/* Animações do Modal (Mais simples e performáticas) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.95); opacity: 0; }
+}
+
+.profile-modal.fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+.profile-modal.fade-out {
+    animation: fadeOut 0.2s ease-out forwards;
+}
+.profile-modal-content.fade-in {
+    animation: scaleIn 0.2s ease-out forwards;
+}
+.profile-modal-content.fade-out {
+    animation: scaleOut 0.2s ease-out forwards;
+}

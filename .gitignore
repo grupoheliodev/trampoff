@@ -1,0 +1,45 @@
+# Ficheiros de Log
+# Logs gerados pelo npm, yarn ou outras ferramentas
+npm-debug.log*
+yarn-debug.log
+yarn-error.log
+
+# Dependências
+# A pasta mais importante a ser ignorada. Contém todas as bibliotecas
+# descarregadas e pode ser recriada a qualquer momento com `npm install`.
+node_modules
+
+# Pasta de Build (Compilação)
+# O Vite cria a pasta 'dist' quando você executa `npm run build`.
+# Esta pasta é enviada para o GitHub Pages pela branch gh-pages, mas não
+# deve fazer parte do seu código-fonte principal.
+dist
+dist-ssr
+
+# Ficheiros de Ambiente
+# Guardam senhas, chaves de API e outras informações sensíveis.
+# NUNCA devem ser enviados para o repositório.
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+# Cache do Vite
+# O Vite cria esta pasta para acelerar o processo de desenvolvimento.
+.vite
+
+# Ficheiros de IDE e Editores de Código
+# Configurações específicas do seu ambiente de desenvolvimento.
+.vscode/
+.idea/
+
+# Ficheiros do Sistema Operativo
+# Ficheiros de sistema criados pelo macOS e Windows.
+.DS_Store
+Thumbs.db
+
+# Relatórios de Testes
+# Pasta gerada por ferramentas de teste como Jest ou Vitest.
+coverage
+# Ignored large binary
+src/assets/imgs/CALST01EP03.mp4
