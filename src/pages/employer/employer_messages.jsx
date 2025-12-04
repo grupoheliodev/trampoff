@@ -117,6 +117,12 @@ const EmployerMessages = () => {
                     }));
                     setMessages(enriched);
 
+                    // marca as notificações desta conversa como lidas imediatamente ao carregar
+                    try {
+                        markChatNotificationsRead({ ownerId: user.id, otherUserId: selectedUser.id }).catch(() => {});
+                        setUnreadMap(prev => ({ ...prev, [String(selectedUser.id)]: false }));
+                    } catch (e) {}
+
                     // Notification on new incoming messages from the other user
                     const last = enriched[enriched.length - 1];
                     const lastTs = last ? new Date(last.createdAt || (last.timestamp && last.timestamp.seconds * 1000) || Date.now()).getTime() : 0;
@@ -213,6 +219,49 @@ const EmployerMessages = () => {
         const interval = setInterval(refresh, 4000);
         return () => { window.removeEventListener('trampoff:notifications-updated', onUpdate); window.removeEventListener('storage', onUpdate); clearInterval(interval); };
     }, [user?.id]);
+
+    // Update avatars when a user profile changes elsewhere in the app
+    useEffect(() => {
+        const handleUserUpdatedEvent = async (e) => {
+            let updated = e && e.detail && e.detail.user ? e.detail.user : null;
+            if (!updated) {
+                // fallback: reload users list
+                try {
+                    const list = await getUsers('freelancer');
+                    const sorted = sortUsersByActivity(list || []);
+                    setUsers(sorted);
+                    usersRef.current = sorted;
+                    if (selectedUser) {
+                        const found = (list || []).find(u => String(u.id) === String(selectedUser.id));
+                        if (found) setSelectedUser(found);
+                    }
+                    return;
+                } catch (_) { return; }
+            }
+
+            setUsers(prev => {
+                const next = (prev || []).map(u => String(u.id) === String(updated.id) ? { ...u, ...updated } : u);
+                usersRef.current = next;
+                return sortUsersByActivity(next);
+            });
+
+            if (selectedUser && String(selectedUser.id) === String(updated.id)) {
+                setSelectedUser(prev => ({ ...prev, ...updated }));
+            }
+
+            // update sender photos in current messages
+            setMessages(prev => (prev || []).map(m => {
+                if (String(m.senderId) === String(updated.id)) {
+                    return { ...m, senderPhoto: updated.photo || m.senderPhoto || perfilFreelancer };
+                }
+                return m;
+            }));
+        };
+
+        window.addEventListener('trampoff:users-updated', handleUserUpdatedEvent);
+        window.addEventListener('storage', handleUserUpdatedEvent);
+        return () => { window.removeEventListener('trampoff:users-updated', handleUserUpdatedEvent); window.removeEventListener('storage', handleUserUpdatedEvent); };
+    }, [selectedUser?.id]);
 
     // Poll resumo de conversas para reordenar quando houver mensagem nova de outros usuários
     useEffect(() => {

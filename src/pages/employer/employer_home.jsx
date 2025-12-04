@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
-import meusContratos from '../../assets/imgs/meus_contratos.png';
+import engrenatemClaro from '../../assets/imgs/engrenagem_claro.png';
+import engrenatemEscuro from '../../assets/imgs/engrenagem_escuro.png';
+import ThemeAwareImage from '../../components/ThemeAwareImage';
 import { createJob, getContractsForUser, getJobs, getApplicationsForJob, updateApplication, createContract, getUsers, sendMessage, getProjectApplications, getProjects, getNotifications, markNotificationRead } from '../../services/api';
 import { useEffect } from 'react';
 import { useAlert } from '../../components/AlertProvider';
+import { useConfirm } from '../../components/ConfirmProvider';
 import { usePrompt } from '../../components/PromptProvider';
 
 const EmployerHome = () => {
@@ -14,6 +17,7 @@ const EmployerHome = () => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const alert = useAlert();
+    const confirm = useConfirm();
     const prompt = usePrompt();
     const [contracts, setContracts] = useState([]);
     const [jobs, setJobs] = useState([]);
@@ -81,7 +85,7 @@ const EmployerHome = () => {
         try {
             const j = await createJob(user.id, { title, description, category, budget });
             setJobs(prev => [j, ...prev]);
-            await alert('Vaga criada (local)');
+            await alert('Vaga criada.');
         } catch (err) {
             await alert(err?.message || 'Erro ao criar vaga');
         }
@@ -99,6 +103,11 @@ const EmployerHome = () => {
 
     const handleAcceptProposal = async (app, job) => {
         try {
+            const ok = await confirm({
+                title: 'Confirmar Aceite',
+                message: 'Ao aceitar a proposta, a empresa reterá 10% do valor do contrato como taxa de serviço. Deseja continuar?'
+            });
+            if (!ok) return;
             await updateApplication(app.id, { status: 'accepted' });
             // tentar extrair número do orçamento (ex: 'R$ 3000')
             let price = 0;
@@ -113,7 +122,7 @@ const EmployerHome = () => {
             const updatedContracts = await getContractsForUser(user.id);
             setContracts(updatedContracts);
             await loadProposals(job.id);
-            await alert('Proposta aceita e contrato criado (local)');
+            await alert('Proposta aceita e contrato criado.');
         } catch (e) {
             await alert(e?.message || 'Erro ao aceitar proposta');
         }
@@ -148,7 +157,7 @@ const EmployerHome = () => {
                     </div>
                         <div className="welcome-illustration">
                             <div className="hero-illustration">
-                                <img src={meusContratos} alt="Ilustração de contratos e gestão para empregadores" />
+                                <ThemeAwareImage darkSrc={engrenatemEscuro} lightSrc={engrenatemClaro} alt="Ilustração de contratos e gestão para empregadores" className="theme-adaptable" />
                             </div>
                         </div>
                 </section>

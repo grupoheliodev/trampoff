@@ -35,6 +35,10 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
     const debounceRef = useRef(null);
     const navigate = useNavigate();
     const [theme, setTheme] = useState(() => (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme')) || localStorage.getItem('trampoff_theme') || 'dark');
+    const [installPrompt, setInstallPrompt] = useState(null);
+    const [installEligible, setInstallEligible] = useState(() => {
+        try { return localStorage.getItem('trampoff_pwa_prompted') !== 'yes'; } catch (e) { return true; }
+    });
     const [isScrolled, setIsScrolled] = useState(false);
     const hamburgerRef = useRef(null);
     const panelRef = useRef(null);
@@ -49,6 +53,27 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // PWA: capture beforeinstallprompt and expose Install button
+    useEffect(() => {
+        const onBeforeInstall = (e) => {
+            // Show only once per device/user unless manually reset
+            if (!installEligible) return;
+            e.preventDefault();
+            setInstallPrompt(e);
+        };
+        const onAppInstalled = () => {
+            try { localStorage.setItem('trampoff_pwa_prompted', 'yes'); } catch (e) {}
+            setInstallPrompt(null);
+            setInstallEligible(false);
+        };
+        window.addEventListener('beforeinstallprompt', onBeforeInstall);
+        window.addEventListener('appinstalled', onAppInstalled);
+        return () => {
+            window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+            window.removeEventListener('appinstalled', onAppInstalled);
+        };
+    }, [installEligible]);
 
     // load unread notifications count for badge
     useEffect(() => {
@@ -199,7 +224,6 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                     </ul>
                     {mobileOpen && (
                         <div id="mobile-menu" className="mobile-nav-overlay" role="menu" aria-label="Menu móvel" onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){} }}>
-                            <button className="mobile-close" aria-label="Fechar menu" onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){} }}>✕</button>
                             <div ref={panelRef} className="mobile-nav-panel" role="presentation" onClick={(e) => e.stopPropagation()}>
                                 <div className="mobile-profile" style={{ marginBottom: 12, textAlign: 'center' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center', marginBottom: 8 }}>
@@ -211,15 +235,14 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                                             <div style={{ fontSize: '0.9rem', color: 'var(--text-medium)' }}>{isFreelancer ? 'Freelancer' : 'Empregador'}</div>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                                        <NavLink to={isFreelancer ? '/freelancer/profile' : '/employer/profile'} onClick={() => setMobileOpen(false)} className="btn btn-secondary">Perfil</NavLink>
-                                        <button className="btn btn-danger" onClick={() => { setMobileOpen(false); onProfileClick && onProfileClick(); }}>Editar</button>
-                                    </div>
+                                    {isFreelancer && (
+                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                            <NavLink to={isFreelancer ? '/freelancer/profile' : '/employer/profile'} onClick={() => setMobileOpen(false)} className="btn btn-secondary">Perfil</NavLink>
+                                            <button className="btn btn-danger" onClick={() => { setMobileOpen(false); onProfileClick && onProfileClick(); }}>Editar</button>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div style={{ marginBottom: 8 }}>
-                                    <input value={query} onChange={(e) => setQuery(e.target.value)} type="text" placeholder="Buscar..." aria-label="buscar" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-light)' }} />
-                                </div>
 
                                 <ul>
                                     {navLinks.map(link => (
@@ -231,9 +254,6 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                                     ))}
                                     <li className="mobile-separator" aria-hidden></li>
                                     <li style={{ marginTop: 8 }}>
-                                        <button className="mobile-back" onClick={() => setMobileOpen(false)}>Voltar</button>
-                                    </li>
-                                    <li style={{ marginTop: 8 }}>
                                         <button className="card-button" onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){}; /* placeholder for logout */ }} style={{ width: '100%' }}>Sair</button>
                                     </li>
                                 </ul>
@@ -243,6 +263,22 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                 </nav>
 
                 <div className="header-controls">
+                    {installPrompt && installEligible && (
+                        <button
+                            className="btn btn-secondary"
+                            onClick={async () => {
+                                try {
+                                    await installPrompt.prompt();
+                                    const choice = await installPrompt.userChoice;
+                                    // Mark as prompted regardless of outcome to avoid duplicate prompts
+                                    try { localStorage.setItem('trampoff_pwa_prompted', 'yes'); } catch (e) {}
+                                    setInstallPrompt(null);
+                                    setInstallEligible(false);
+                                } catch (e) {}
+                            }}
+                            title="Instalar aplicativo"
+                        >Instalar</button>
+                    )}
                     <div ref={containerRef} className="search-bar" style={{ position: 'relative' }}>
                         <input
                             value={query}
@@ -251,7 +287,10 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault();
                                     const q = (query || '').trim();
-                                    if (q.length >= 2) navigate(`/search?q=${encodeURIComponent(q)}`);
+                                    if (q.length >= 1) {
+                                        try { localStorage.setItem('trampoff_last_search', q); } catch (err) {}
+                                        navigate(`/search?q=${encodeURIComponent(q)}`);
+                                    }
                                 }
                             }}
                             type="text"
@@ -260,7 +299,10 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                         />
                                                 <button type="button" onClick={() => {
                                                         const q = (query || '').trim();
-                                                        if (q.length >= 2) navigate(`/search?q=${encodeURIComponent(q)}`);
+                                                        if (q.length >= 1) {
+                                                            try { localStorage.setItem('trampoff_last_search', q); } catch (err) {}
+                                                            navigate(`/search?q=${encodeURIComponent(q)}`);
+                                                        }
                                                         else setOpen(s => !s);
                                                     }} aria-label="Abrir busca">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>

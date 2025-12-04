@@ -27,8 +27,10 @@ html, body, #root {
   width: 100%;
   max-width: 100%;
   padding: 10px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
+  background-color: rgba(0,0,0,0.2);
+  color: var(--text-light);
 }
 
 .btn {
@@ -42,7 +44,7 @@ html, body, #root {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--accent-blue);
   color: #fff;
 }
 
@@ -77,14 +79,11 @@ html, body, #root {
   text-align: center;
 }
 
-.logo {
+.logo.react {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
@@ -100,7 +99,7 @@ html, body, #root {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
+  a:nth-of-type(2) .logo.react {
     animation: logo-spin infinite 20s linear;
   }
 }
@@ -113,28 +112,7 @@ html, body, #root {
   color: #888;
 }
 
-/* Selection page adjustments */
-.selection-page { display: flex; align-items: center; justify-content: center; min-height: 80vh; padding: var(--gap-md); }
-.selection-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 var(--gap-md); position: relative; box-sizing: border-box; overflow: hidden; }
-.selection-title { margin: 12px 0; font-size: 1.6rem; text-align: center; }
-.selection-subtitle { margin: 0 0 var(--gap-md); color: #555; text-align: center; }
-.selection-options { display: flex; flex-direction: column; gap: var(--gap-md); align-items: stretch; width: 100%; }
-.selection-row { flex-direction: column; width: 100%; }
-.selection-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: var(--gap-md); display: flex; flex-direction: column; align-items: center; text-align: center; background: #0b1020; box-sizing: border-box; width: 100%; max-width: 560px; margin: 0 auto; z-index: 0; }
-.selection-card > * { max-width: 560px; }
-.selection-button { margin-top: var(--gap-sm); padding: 12px 16px; border-radius: 10px; background: #f59e0b; color: #0b0b0b; text-decoration: none; font-weight: 700; }
-.card-icon { width: 64px; height: 64px; object-fit: contain; }
-
-/* Sempre empilhado verticalmente para evitar overflow */
-@media (min-width: 769px) {
-  .selection-options { flex-direction: column; }
-}
-@media (max-width: 768px) {
-  .selection-options { flex-direction: column; }
-  .selection-card { margin: 0 auto; width: 100%; }
-  .selection-button { width: 100%; }
-  .card-icon { width: 56px; height: 56px; }
-}
+/* Selection page styles defined in index.css to match trampoff-main */
 
 /* Botão instalar fixo com respiro no mobile */
 .pwa-install-bar {
@@ -148,13 +126,13 @@ html, body, #root {
 
 /* Registration page responsive layout */
 .registration-page { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: var(--gap-md); }
-.registration-container { width: 100%; max-width: 720px; background: #0b0b0b; border-radius: 12px; padding: var(--gap-md); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+.registration-container { width: 100%; max-width: 720px; background: linear-gradient(145deg, var(--gun-powder), #313641); border-radius: 12px; padding: var(--gap-md); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
 .registration-title { margin: 8px 0 16px; }
 .registration-form { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); }
 .registration-form .form-group { display: flex; flex-direction: column; gap: 8px; }
 .registration-form .form-group input,
-.registration-form .form-group textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background: #0b0b0b; color: #eee; }
-.registration-button { grid-column: 1 / -1; padding: 12px 16px; border: none; border-radius: 8px; background: #3b82f6; color: #fff; font-weight: 600; cursor: pointer; }
+.registration-form .form-group textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-light); }
+.registration-button { grid-column: 1 / -1; padding: 12px 16px; border: none; border-radius: 8px; background: var(--accent-blue); color: #fff; font-weight: 600; cursor: pointer; transition: all var(--transition-speed); }
 
 @media (max-width: 768px) {
   .registration-form { grid-template-columns: 1fr; }

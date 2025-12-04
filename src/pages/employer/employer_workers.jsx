@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import thugClaro from '../../assets/imgs/thug_claro.png';
+import thugEscuro from '../../assets/imgs/thug_escuro.png';
+import ThemeAwareImage from '../../components/ThemeAwareImage';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
@@ -21,6 +24,10 @@ const EmployerWorkers = () => {
             <main className="main-content">
                 <section>
                     <h2 className="section-title">Trabalhadores Disponíveis</h2>
+                    {/* Ilustração da página Trabalhadores Disponíveis */}
+                    <div className="jobs-hero">
+                        <ThemeAwareImage darkSrc={thugEscuro} lightSrc={thugClaro} alt="Trabalhadores disponíveis" className="jobs-illustration theme-adaptable" />
+                    </div>
                     <div className="list-container">
                         <div className="card worker-card">
                             <h3 className="card-title">Ana Souza</h3>

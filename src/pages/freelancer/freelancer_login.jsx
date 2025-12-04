@@ -166,22 +166,6 @@ const FreelancerLogin = () => {
                 </form>
                 {!isResetMode && (
                     <div className="login-side-actions">
-                        <button
-                            type="button"
-                            className="registration-button social-login-button"
-                            onClick={async () => {
-                                try {
-                                    const data = await socialLogin('google', 'freelancer');
-                                    if (data) {
-                                        navigate('/freelancer/home');
-                                    }
-                                } catch (error) {
-                                    await alert('Não foi possível entrar com Google.');
-                                }
-                            }}
-                        >
-                            Entrar com Google
-                        </button>
                         <Link to="/freelancer/registration" className="login_paragraph"><p>Não Possui Cadastro?<br/>Faça Agora</p></Link>
                     </div>
                 )}

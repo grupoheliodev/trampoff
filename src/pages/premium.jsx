@@ -1,6 +1,5 @@
 import React from 'react';
 import AdSidebar from '../components/AdSidebar.jsx';
-import '../assets/styles/premium.css';
 
 const PricingCard = ({ title, price, features }) => (
   <div className="pricing-card">
@@ -14,8 +13,7 @@ const PricingCard = ({ title, price, features }) => (
 );
 
 const PremiumPage = () => {
-  const basicFeatures = ['Perfil em destaque', 'Suporte via chat', 'Acesso a vagas exclusivas'];
-  const proFeatures = ['Tudo do Basic', 'Relatórios Avançados', 'Mais candidaturas por mês'];
+  const proFeatures = ['Perfil em destaque', 'Suporte via chat', 'Relatórios avançados', 'Mais candidaturas por mês'];
 
   return (
     <div className="premium-page">
@@ -26,7 +24,6 @@ const PremiumPage = () => {
         </section>
 
         <section className="pricing-section">
-          <PricingCard title="Basic" price="R$ 19,90/mês" features={basicFeatures} />
           <PricingCard title="Pro" price="R$ 49,90/mês" features={proFeatures} />
           <div className="payment-card">
             <h3>Pagamento (visual apenas)</h3>

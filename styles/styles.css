@@ -1,25 +1,16 @@
 /* ==========================================================================
    1. Configurações Globais e Variáveis
    ========================================================================== */
-:root {
-    --saffron-rgb: 246, 193, 53;
-    --big-stone-rgb: 19, 24, 58;
-    --walnut-rgb: 112, 74, 28;
-    --storm-gray-rgb: 102, 107, 132;
-    --cedar-rgb: 52, 31, 19;
-    --rope-rgb: 141, 90, 29;
-    --kumera-rgb: 127, 94, 36;
-    --gun-powder-rgb: 64, 67, 91;
-    --bali-hai-rgb: 132, 149, 169;
-    --regent-gray-rgb: 127, 138, 165;
-}
+/* Color variables are provided by `src/assets/styles/index.css` (trampoff-main palette).
+   This file uses those variables (e.g. --big-stone, --gun-powder, --saffron).
+*/
 
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: rgba(var(--big-stone-rgb), 1);
-    color: rgba(var(--bali-hai-rgb), 1);
+    background-color: var(--big-stone);
+    color: var(--bali-hai);
 }
 
 a {
@@ -37,12 +28,12 @@ a {
 }
 
 .main-header {
-    background-color: rgba(var(--big-stone-rgb), 1);
+    background-color: var(--big-stone);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    border-bottom: 2px solid rgba(var(--gun-powder-rgb), 1);
+    border-bottom: 2px solid var(--gun-powder);
     flex-wrap: wrap;
 }
 
@@ -51,8 +42,10 @@ a {
 }
 
 .logo {
-    height: 150px;
-    border-radius: 50%;
+    height: auto;
+    border-radius: 0;
+    max-width: 220px;
+    object-fit: contain;
 }
 
 .main-nav ul {
@@ -65,7 +58,7 @@ a {
 }
 
 .main-nav a {
-    color: rgba(var(--bali-hai-rgb), 1);
+    color: var(--bali-hai);
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s;
@@ -73,7 +66,7 @@ a {
 
 .main-nav a:hover,
 .main-nav a.active {
-    color: rgba(var(--saffron-rgb), 1);
+    color: var(--saffron);
 }
 
 .search-profile-container {
@@ -87,24 +80,24 @@ a {
     display: flex;
     border-radius: 20px;
     overflow: hidden;
-    background-color: rgba(var(--gun-powder-rgb), 1);
+    background-color: var(--gun-powder);
 }
 
 .search-bar input {
     border: none;
     padding: 0.5rem 1rem;
     background: none;
-    color: rgba(var(--bali-hai-rgb), 1);
+    color: var(--bali-hai);
     outline: none;
     width: 100%;
 }
 
 .search-bar button {
-    background-color: rgba(var(--saffron-rgb), 1);
+    background-color: var(--saffron);
     border: none;
     padding: 0.5rem 1rem;
     cursor: pointer;
-    color: rgba(var(--big-stone-rgb), 1);
+    color: var(--big-stone);
 }
 
 .profile-area {
@@ -115,14 +108,14 @@ a {
 
 .profile-name {
     font-weight: bold;
-    color: rgba(var(--bali-hai-rgb), 1);
+    color: var(--bali-hai);
 }
 
 .profile-photo {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid rgba(var(--saffron-rgb), 1);
+    border: 2px solid var(--saffron);
     overflow: hidden;
 }
 
@@ -143,14 +136,14 @@ a {
 }
 
 .welcome-title {
-    color: rgba(var(--saffron-rgb), 1);
+    color: var(--saffron);
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
 }
 
 .welcome-subtitle {
     font-size: 1.2rem;
-    color: rgba(var(--regent-gray-rgb), 1);
+    color: var(--regent-gray);
 }
 
 .section-title {
@@ -235,11 +228,12 @@ a {
 }
 
 .logo-large {
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    margin-bottom: -4rem;
-    margin-top: -4rem;
+    width: 240px;
+    height: auto;
+    border-radius: 0;
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    object-fit: contain;
 }
 
 .selection-title {
@@ -316,21 +310,22 @@ a {
 }
 
 .logo-small {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    margin-bottom: -4rem;
-    margin-top: -4rem;
+    width: 180px;
+    height: auto;
+    border-radius: 0;
+    margin-bottom: 1rem;
+    margin-top: 0;
+    object-fit: contain;
 }
 
 .registration-title {
-    color: rgba(var(--saffron-rgb), 1);
+    color: var(--saffron);
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
 }
 
 .registration-subtitle {
-    color: rgba(var(--regent-gray-rgb), 1);
+    color: var(--regent-gray);
     font-size: 1rem;
     margin-bottom: 2rem;
 }
@@ -721,16 +716,20 @@ a {
 
     .logo-large {
         width: 200px;
-        height: 200px;
-        margin-bottom: -3rem;
-        margin-top: -3rem;
+        height: auto;
+        margin-bottom: 1rem;
+        margin-top: 0;
+        border-radius: 0;
+        object-fit: contain;
     }
 
     .logo-small {
         width: 150px;
-        height: 150px;
-        margin-bottom: -3rem;
-        margin-top: -3rem;
+        height: auto;
+        margin-bottom: 1rem;
+        margin-top: 0;
+        border-radius: 0;
+        object-fit: contain;
     }
 
     .registration-container {

@@ -17,7 +17,7 @@ const SearchResults = () => {
     const params = new URLSearchParams(location.search);
     const query = params.get('q') || localStorage.getItem('trampoff_last_search') || '';
     setQ(query);
-    if (!query || query.trim().length < 2) { setResults({ users: [], jobs: [], projects: [], messages: [] }); return; }
+    if (!query || query.trim().length < 1) { setResults({ users: [], jobs: [], projects: [], messages: [] }); return; }
     const run = async () => {
       setLoading(true); setError('');
       try {

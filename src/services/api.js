@@ -59,8 +59,8 @@ async function request(endpoint, options = {}) {
 
   if (!API_URL) {
     const msg = import.meta.env.PROD
-      ? 'API do backend não configurada (defina VITE_API_URL em Vercel)'
-      : 'API_URL não definido (use VITE_API_URL em dev ou rode backend local)';
+      ? 'API do backend não configurada. Defina VITE_API_URL.'
+      : 'API do backend não configurada. Defina VITE_API_URL.';
     throw new Error(msg);
   }
 
@@ -111,6 +111,8 @@ const normalizeType = (t) => {
 
 const USERS_KEY = 'trampoff_users';
 const MESSAGES_KEY = 'messages';
+const LEGACY_MESSAGES_KEY = 'trampoff_messages';
+
 function generateId() {
   return Date.now() + Math.floor(Math.random() * 10000);
 }
@@ -119,9 +121,17 @@ const loadUsers = () => {
 };
 const saveUsers = (arr) => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
 const loadMessages = () => {
-  try { return JSON.parse(localStorage.getItem(MESSAGES_KEY)) || []; } catch (e) { return []; }
+  try {
+    const raw = localStorage.getItem(MESSAGES_KEY) || localStorage.getItem(LEGACY_MESSAGES_KEY);
+    return JSON.parse(raw) || [];
+  } catch (e) { return []; }
 };
-const saveMessages = (arr) => localStorage.setItem(MESSAGES_KEY, JSON.stringify(arr));
+const saveMessages = (arr) => {
+  try {
+    localStorage.setItem(MESSAGES_KEY, JSON.stringify(arr));
+    try { localStorage.setItem(LEGACY_MESSAGES_KEY, JSON.stringify(arr)); } catch (e) {}
+  } catch (e) { /* ignore */ }
+};
 
 export const register = async (userData, userType) => {
   // If an API URL is configured, attempt backend; on failure gracefully fallback to localStorage
@@ -418,12 +428,62 @@ export const updateUserPhotoUrl = async (userId, url) => {
   return { success: true, photo: url };
 };
 
+// Faz upload de imagem para o backend (Firebase Storage) e retorna URL
+export const uploadUserPhoto = async (file) => {
+  if (!API_URL) {
+    throw new Error('API_URL não definido para upload de imagem');
+  }
+  const form = new FormData();
+  form.append('arquivo', file, file && file.name ? file.name : 'upload.png');
+  const res = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Upload falhou (${res.status})`);
+  }
+  const data = await res.json();
+  return data && data.url ? data.url : null;
+};
+
 // Busca unificada (users, jobs, projects, messages)
 export const unifiedSearch = async (q) => {
   const query = (q || '').trim();
-  if (query.length < 2) return { users: [], jobs: [], projects: [], messages: [] };
+  if (query.length < 1) return { users: [], jobs: [], projects: [], messages: [] };
   if (API_URL) {
-    return request(`/search?q=${encodeURIComponent(query)}`);
+    try {
+      const remote = await request(`/search?q=${encodeURIComponent(query)}`);
+      // If remote returned empty sets but we have local data that matches, merge fallback results
+      const hasRemote = (arr) => Array.isArray(arr) && arr.length > 0;
+      if (hasRemote(remote.users) || hasRemote(remote.jobs) || hasRemote(remote.projects) || hasRemote(remote.messages)) {
+        return remote;
+      }
+      // remote was empty; compute local fallback and merge (prefer remote when duplicates)
+      const lower = query.toLowerCase();
+      const localUsers = loadUsers().filter(u => ((u.name||'') + (u.email||'')).toLowerCase().includes(lower));
+      const localJobs = loadJobs().filter(j => ((j.title||'') + (j.description||'')).toLowerCase().includes(lower));
+      const localProjects = loadProjects().filter(p => ((p.title||'') + (p.description||'')).toLowerCase().includes(lower));
+      const localMessages = loadMessages().filter(m => (String(m.content||'').toLowerCase().includes(lower)));
+      // merge unique by id: remote first, then local if id not present
+      const mergeById = (remoteArr, localArr) => {
+        const seen = new Set((remoteArr || []).map(x => String(x.id)));
+        const out = Array.isArray(remoteArr) ? [...remoteArr] : [];
+        for (const l of (localArr || [])) {
+          if (!seen.has(String(l.id))) out.push(l);
+        }
+        return out;
+      };
+      return {
+        users: mergeById(remote.users, localUsers),
+        jobs: mergeById(remote.jobs, localJobs),
+        projects: mergeById(remote.projects, localProjects),
+        messages: mergeById(remote.messages, localMessages),
+      };
+    } catch (e) {
+      console.warn('[unifiedSearch] backend unavailable, falling back to local search', e && e.message ? e.message : e);
+      // continue to fallback local
+    }
   }
   await sleep(60);
   const lower = query.toLowerCase();

@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
 import { getJobs, applyToJob } from '../../services/api';
+import JobApplyModal from '../../components/JobApplyModal';
 import { useAlert } from '../../components/AlertProvider';
 import { usePrompt } from '../../components/PromptProvider';
 import { useEffect } from 'react';
@@ -15,6 +16,9 @@ const FreelancerJobs = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const [showApplyModal, setShowApplyModal] = useState(false);
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [appliedJobIds, setAppliedJobIds] = useState([]);
     const alert = useAlert();
     const prompt = usePrompt();
 
@@ -27,14 +31,30 @@ const FreelancerJobs = () => {
     useEffect(() => {
         let mounted = true;
         getJobs().then(list => { if (mounted) setJobs(list || []); }).catch(() => setJobs([]));
+        // carregar candidaturas existentes para desabilitar botão
+        try {
+            const apps = JSON.parse(localStorage.getItem('trampoff_applications')) || [];
+            const ids = (apps || []).filter(a => String(a.userId) === String(user?.id) && a.jobId != null).map(a => a.jobId);
+            if (mounted) setAppliedJobIds(ids);
+        } catch {
+            // ignore
+        }
         return () => { mounted = false };
-    }, []);
+    }, [user]);
 
     const handleApply = async (job) => {
         if (!user) { await alert('Faça login para aplicar'); return; }
-        const cover = await prompt('Digite uma breve mensagem/carta de apresentação (opcional)');
+        setSelectedJob(job);
+        setShowApplyModal(true);
+    };
+
+    const handleSubmitApplication = async (message) => {
+        if (!user || !selectedJob) return;
         try {
-            await applyToJob(job.id, user.id, cover || '');
+            await applyToJob(selectedJob.id, user.id, message);
+            setAppliedJobIds(prev => Array.from(new Set([...(prev || []), selectedJob.id])));
+            setShowApplyModal(false);
+            setSelectedJob(null);
             await alert('Candidatura enviada!');
         } catch (err) {
             await alert(err?.message || 'Erro ao aplicar');
@@ -55,7 +75,7 @@ const FreelancerJobs = () => {
                     </div>
                     <div className="list-container">
                         {jobs.length === 0 && <p>Nenhuma vaga disponível no momento.</p>}
-                        {jobs.map(job => (
+                        {jobs.filter(job => !appliedJobIds.includes(job.id)).map(job => (
                             <div className="card job-card" key={job.id}>
                                 <h3 className="card-title">{job.title}</h3>
                                 <p className="card-description">{job.description}</p>
@@ -71,12 +91,47 @@ const FreelancerJobs = () => {
                                             : 'a combinar'}
                                     </span>
                                 </div>
-                                <button className="card-button" onClick={() => handleApply(job)}>Aplicar agora</button>
+                                <button className="card-button" onClick={() => handleApply(job)} disabled={appliedJobIds.includes(job.id)}>
+                                    {appliedJobIds.includes(job.id) ? 'Já aplicado' : 'Aplicar agora'}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                <section>
+                    <h2 className="section-title">Vagas já aplicadas</h2>
+                    <div className="list-container">
+                        {jobs.filter(job => appliedJobIds.includes(job.id)).length === 0 && <p>Você ainda não aplicou em nenhuma vaga.</p>}
+                        {jobs.filter(job => appliedJobIds.includes(job.id)).map(job => (
+                            <div className="card job-card" key={`applied-${job.id}`}>
+                                <h3 className="card-title">{job.title}</h3>
+                                <p className="card-description">{job.description}</p>
+                                <div className="card-meta">
+                                    <span>Categoria: {job.category || 'Geral'}</span>
+                                    <span>
+                                        Orçamento:{' '}
+                                        {job.budget !== undefined && job.budget !== null && job.budget !== ''
+                                            ? Number(job.budget).toLocaleString('pt-BR', {
+                                                style: 'currency',
+                                                currency: 'BRL',
+                                            })
+                                            : 'a combinar'}
+                                    </span>
+                                </div>
+                                <button className="card-button" disabled>
+                                    Já aplicado
+                                </button>
                             </div>
                         ))}
                     </div>
                 </section>
             </main>
+            <JobApplyModal
+                open={showApplyModal}
+                job={selectedJob}
+                onCancel={() => { setShowApplyModal(false); setSelectedJob(null); }}
+                onSubmit={handleSubmitApplication}
+            />
         </div>
     );
 };

@@ -12,6 +12,7 @@ import PromptProvider from './components/PromptProvider.jsx';
 
 import './assets/styles/index.css';
 import './assets/styles/animations.css';
+import './assets/styles/premium.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

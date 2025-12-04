@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import meusContratos from '../../assets/imgs/meus_contratos.png';
+import contratoClaro from '../../assets/imgs/contrato_claro.png';
+import contratoEscuro from '../../assets/imgs/contrato_escuro.png';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
@@ -7,7 +9,6 @@ import ProfileModal from '../../components/ProfileModal';
 import { getContractsForUser, completeContract, createReview, getReviewsForUser } from '../../services/api';
 import { useConfirm } from '../../components/ConfirmProvider';
 import ReviewModal from '../../components/ReviewModal';
-import { useEffect } from 'react';
 import { useAlert } from '../../components/AlertProvider';
 
 const EmployerContracts = () => {
@@ -20,6 +21,7 @@ const EmployerContracts = () => {
     const [reviewsMap, setReviewsMap] = useState({});
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [currentReviewTarget, setCurrentReviewTarget] = useState(null); // { contractId, targetUserId }
+    const [theme, setTheme] = useState(() => (typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme')) || localStorage.getItem('trampoff_theme') || 'dark');
 
     useEffect(() => {
         let mounted = true;
@@ -32,6 +34,21 @@ const EmployerContracts = () => {
         }}).catch(() => {});
         return () => { mounted = false };
     }, [user]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return undefined;
+        const handleThemeChange = () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('trampoff_theme') || 'dark';
+            setTheme(newTheme);
+        };
+        window.addEventListener('trampoff:theme-changed', handleThemeChange);
+        const observer = new MutationObserver(handleThemeChange);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        return () => { 
+            window.removeEventListener('trampoff:theme-changed', handleThemeChange);
+            observer.disconnect();
+        };
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -52,7 +69,7 @@ const EmployerContracts = () => {
                                 <p className="contracts-empty-text">Nenhum contrato encontrado.</p>
                             </div>
                             <div className="contracts-hero-right">
-                                <img src={meusContratos} alt="Meus contratos" className="contracts-illustration theme-adaptable" />
+                                <img src={theme === 'light' ? contratoClaro : contratoEscuro} alt="Meus contratos" className="contracts-illustration" />
                             </div>
                         </div>
                     )}

@@ -11,8 +11,6 @@ const EmployerRegistration = () => {
     const [formData, setFormData] = useState({ company_name: '', email: '', password: '', phone: '', cnpj: '', description: '' });
     const [cnpjError, setCnpjError] = useState('');
     const [phoneError, setPhoneError] = useState('');
-    // Etapa de confirmação removida – processo direto
-    const [infoMessage, setInfoMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -125,8 +123,18 @@ const EmployerRegistration = () => {
         }
 
         try {
-            await register({ name: formData.company_name, email: formData.email, password: formData.password, companyName: formData.company_name, phone: formData.phone, cnpj: formData.cnpj, description: formData.description }, 'contratante');
-            setInfoMessage('Cadastro realizado! E-mail verificado automaticamente.');
+            await register({
+                name: formData.company_name,
+                email: formData.email,
+                password: formData.password,
+                companyName: formData.company_name,
+                phone: formData.phone,
+                cnpj: formData.cnpj,
+                description: formData.description
+            }, 'contratante');
+
+            // Após cadastro bem-sucedido, vai direto para o home do empregador
+            navigate('/employer/home');
         } catch (error) {
             const msg = error?.message || 'Erro ao cadastrar. Tente novamente.';
             setRegistrationError(msg);
@@ -180,7 +188,6 @@ const EmployerRegistration = () => {
                     <button type="submit" className="registration-button">
                         Cadastrar
                     </button>
-                    {infoMessage && <p style={{ color: 'var(--bali-hai)', marginTop: 8 }}>{infoMessage}</p>}
                     {registrationError && <p style={{ color: 'red', marginTop: 8 }}>{registrationError}</p>}
                 </form>
                 <Link to="/employer/login" className="login_paragraph"><p>Já tem uma conta? Faça Login</p></Link>

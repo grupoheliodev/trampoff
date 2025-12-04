@@ -8,6 +8,7 @@ import { getUsers, getMessages, sendMessage, createMessageNotification, markChat
 import { requestNotificationPermission, notify } from '../../components/notify';
 import { useAlert } from '../../components/AlertProvider';
 import perfilEmployer from '../../assets/imgs/perfil_employer.png';
+import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 
 const FreelancerMessages = () => {
     const { user, logout } = useAuth();
@@ -108,6 +109,11 @@ const FreelancerMessages = () => {
                 const msgs = await getMessages(user.id, selectedUser.id);
                 if (mounted) {
                     setMessages(msgs || []);
+                    // marca como lidas as notificações desta conversa imediatamente
+                    try {
+                        markChatNotificationsRead({ ownerId: user.id, otherUserId: selectedUser.id }).catch(() => {});
+                        setUnreadMap(prev => ({ ...prev, [String(selectedUser.id)]: false }));
+                    } catch (e) {}
 
                     const last = (msgs || [])[msgs?.length - 1];
                     const lastTs = last ? new Date(last.createdAt || (last.timestamp && last.timestamp.seconds * 1000) || Date.now()).getTime() : 0;
@@ -192,6 +198,49 @@ const FreelancerMessages = () => {
         const interval = setInterval(refresh, 4000);
         return () => { window.removeEventListener('trampoff:notifications-updated', onUpdate); window.removeEventListener('storage', onUpdate); clearInterval(interval); };
     }, [user?.id]);
+
+    // Update avatars when a user profile changes elsewhere in the app
+    useEffect(() => {
+        const handleUserUpdatedEvent = async (e) => {
+            let updated = e && e.detail && e.detail.user ? e.detail.user : null;
+            if (!updated) {
+                // try to reload users list as fallback
+                try {
+                    const list = await getUsers('employer');
+                    const sorted = sortUsersByActivity(list || []);
+                    setUsers(sorted);
+                    usersRef.current = sorted;
+                    if (selectedUser) {
+                        const found = (list || []).find(u => String(u.id) === String(selectedUser.id));
+                        if (found) setSelectedUser(found);
+                    }
+                    return;
+                } catch (_) { return; }
+            }
+
+            setUsers(prev => {
+                const next = (prev || []).map(u => String(u.id) === String(updated.id) ? { ...u, ...updated } : u);
+                usersRef.current = next;
+                return sortUsersByActivity(next);
+            });
+
+            if (selectedUser && String(selectedUser.id) === String(updated.id)) {
+                setSelectedUser(prev => ({ ...prev, ...updated }));
+            }
+
+            // refresh sender photos in currently loaded messages
+            setMessages(prev => (prev || []).map(m => {
+                if (String(m.senderId) === String(updated.id)) {
+                    return { ...m, senderPhoto: updated.photo || m.senderPhoto || perfilEmployer };
+                }
+                return m;
+            }));
+        };
+
+        window.addEventListener('trampoff:users-updated', handleUserUpdatedEvent);
+        window.addEventListener('storage', handleUserUpdatedEvent);
+        return () => { window.removeEventListener('trampoff:users-updated', handleUserUpdatedEvent); window.removeEventListener('storage', handleUserUpdatedEvent); };
+    }, [selectedUser?.id]);
 
     // Poll resumo para auto-bump quando chegar mensagem em outra conversa
     useEffect(() => {
@@ -317,7 +366,7 @@ const FreelancerMessages = () => {
                                                     <small>{new Date(msg.createdAt || (msg.timestamp && msg.timestamp.seconds * 1000) || Date.now()).toLocaleString()}</small>
                                                 </div>
                                                 {msg.senderId === user.id && (
-                                                    <div className="message-avatar"><img src={user?.photo || perfilEmployer} alt="avatar" /></div>
+                                                    <div className="message-avatar"><img src={user?.photo || perfilFreelancer} alt="avatar" /></div>
                                                 )}
                                             </div>
                                         ))}

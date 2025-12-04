@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import perfilFreelancer from '../assets/imgs/perfil_freelancer.png';
 import perfilEmployer from '../assets/imgs/perfil_employer.png';
 import { useAuth } from '../context/AuthContext';
+import { uploadUserPhoto, updateUserPhotoUrl } from '../services/api';
 
 const ProfileModal = ({ show, onClose, userType, username, onLogout }) => {
     const auth = useAuth();
@@ -32,19 +33,28 @@ const ProfileModal = ({ show, onClose, userType, username, onLogout }) => {
         setPreview(user?.photo || fallbackImg);
     }, [user, fallbackImg]);
 
-    const handleFile = (file) => {
+    const handleFile = async (file) => {
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const dataUrl = e.target.result;
-            setPreview(dataUrl);
-            // atualizar user no contexto e localStorage
-            if (user) {
-                const updated = { ...user, photo: dataUrl };
+        try {
+            // Atualiza preview imediato
+            const localReader = new FileReader();
+            localReader.onload = (e) => setPreview(e.target.result);
+            localReader.readAsDataURL(file);
+
+            // Faz upload para backend (Firebase Storage) e salva URL pública
+            const url = await uploadUserPhoto(file);
+            if (url && user && user.id) {
+                try {
+                    await updateUserPhotoUrl(user.id, url);
+                } catch (_) {}
+                // sincroniza no contexto/localStorage
+                const updated = { ...user, photo: url };
                 updateUser && updateUser(updated);
             }
-        };
-        reader.readAsDataURL(file);
+        } catch (e) {
+            // Em caso de erro, mantém preview local e não altera URL
+            console.warn('[ProfileModal] Falha ao enviar foto:', e && e.message ? e.message : e);
+        }
     };
 
     return (

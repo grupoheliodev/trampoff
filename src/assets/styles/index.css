@@ -1,8 +1,5 @@
-/* ==========================================================================
-   1. Configurações Globais e Variáveis (Versão Otimizada)
-   ========================================================================== */
 :root {
-    /* Cores Base */
+/* Cores Base */
     /* Paleta mais acessível (amigável a daltônicos) */
     --accent-blue: #005f99; /* azul mais escuro e forte */
     --accent-orange: #f1c40f; /* dourado mais vivo */
@@ -22,7 +19,7 @@
     --text-medium: #a8b3bf;
     --text-dark: #6e798f;
     --glow-color-subtle: rgba(246, 193, 53, 0.3); /* Glow mais discreto */
-    --focus-color: #2b2b2b; /* destaque de foco (agora escuro) */
+    --focus-color: var(--accent-blue); /* destaque de foco */
 
     /* Transições */
     --transition-speed: 0.18s ease-in-out;
@@ -104,7 +101,6 @@ input:focus, textarea:focus {
     * { transition: none !important; animation: none !important; }
 }
 
-
 /* ==========================================================================
    2. Layout Principal e Cabeçalho
    ========================================================================== */
@@ -140,8 +136,9 @@ input:focus, textarea:focus {
     width: auto;
     max-height: 110px;
     border-radius: 0; /* sem círculo em volta da logo principal */
-    display: block;
+    display: flex;
     transition: transform var(--transition-speed);
+  
 }
 .logo:hover { transform: scale(1.04); }
 
@@ -248,23 +245,42 @@ input:focus, textarea:focus {
     height: 44px;
     border-radius: 10px;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
     align-items: center;
     justify-content: center;
     cursor: pointer;
     margin-right: 8px;
+    padding: 0;
 }
 .hamburger:focus { outline: 3px solid rgba(0,95,153,0.14); }
-.hamburger-box { display: inline-block; width: 22px; height: 14px; position: relative; }
+.hamburger-box { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 14px; position: relative; }
 .hamburger-inner, .hamburger-inner:before, .hamburger-inner:after {
-    width: 22px; height: 2px; background: var(--text-light); display: block; position: absolute; left: 0; transition: transform 200ms ease, opacity 200ms ease;
+    width: 22px;
+    height: 2px;
+    background: var(--text-light);
+    display: block;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: transform 200ms ease, opacity 200ms ease;
 }
 .hamburger-inner { top: 6px; }
 .hamburger-inner:before { content: ''; top: -6px; }
 .hamburger-inner:after { content: ''; top: 6px; }
-.hamburger.is-open .hamburger-inner { transform: rotate(45deg); }
-.hamburger.is-open .hamburger-inner:before { transform: rotate(90deg) translateX(0); top: 0; }
+.hamburger.is-open .hamburger-inner { transform: translateX(-50%) rotate(45deg); }
+.hamburger.is-open .hamburger-inner:before { transform: translateX(-50%) rotate(90deg); top: 0; }
 .hamburger.is-open .hamburger-inner:after { opacity: 0; }
+
+/* Ensure hamburger is visible in light mode */
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.15);
+}
+
+[data-theme="light"] .hamburger-inner,
+[data-theme="light"] .hamburger-inner:before,
+[data-theme="light"] .hamburger-inner:after {
+    background: var(--text-light);
+}
 
 /* Mobile overlay menu — centered */
 .mobile-nav-overlay {
@@ -282,39 +298,31 @@ input:focus, textarea:focus {
     animation: menuFadeIn 160ms ease-out;
 }
 
-.mobile-nav-overlay .mobile-close {
-    position: absolute;
-    right: 14px;
-    top: 14px;
-    background: transparent;
-    border: none;
-    color: var(--text-light);
-    font-size: 1.6rem;
-    padding: 8px;
-    cursor: pointer;
-}
-
 
 .mobile-nav-overlay .mobile-nav-panel {
     width: min(92%, 560px);
     max-width: 560px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    background: linear-gradient(180deg, rgba(25, 31, 68, 0.95), rgba(20, 26, 58, 0.98));
     border-radius: 14px;
     padding: clamp(12px, 3.5vw, 20px);
     box-shadow: 0 24px 80px rgba(0,0,0,0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    max-height: calc(100vh - 48px);
-    overflow: auto;
+    max-height: 95vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .mobile-nav-overlay ul { list-style: none; margin: 0; padding: 0; text-align: center; }
 .mobile-nav-overlay li { margin: 8px 0; }
-.mobile-nav-overlay a, .mobile-nav-overlay button.mobile-back {
+.mobile-nav-overlay a, .mobile-nav-overlay button {
     font-size: clamp(16px, 2.8vw, 18px);
     color: var(--text-light);
     padding: 14px 16px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 10px;
     width: 100%;
     text-align: center;
@@ -324,14 +332,30 @@ input:focus, textarea:focus {
     line-height: 1.1;
     min-height: 48px; /* ensure adequate touch target */
 }
-.mobile-nav-overlay a:hover, .mobile-nav-overlay button.mobile-back:hover { background: rgba(255,255,255,0.02); color: var(--saffron); }
+.mobile-nav-overlay a:hover, .mobile-nav-overlay button:hover { background: rgba(255,255,255,0.02); color: var(--saffron); }
 .mobile-nav-overlay a.active { color: var(--saffron); }
+
+/* Remove default focus outline and apply theme-aware focus ring */
+.mobile-nav-overlay a:focus, .mobile-nav-overlay button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+
+/* Light theme: darker focus ring */
+[data-theme="light"] .mobile-nav-overlay a:focus,
+[data-theme="light"] .mobile-nav-overlay button:focus {
+    box-shadow: 0 0 0 3px rgba(11,26,43,0.08);
+}
 .mobile-nav-overlay .mobile-separator { height: 1px; background: rgba(255,255,255,0.03); margin: 8px 0; }
 
 @media (max-width: 420px) {
-    .mobile-nav-overlay .mobile-nav-panel { padding: 12px; width: calc(100% - 24px); }
+    .mobile-nav-overlay .mobile-nav-panel { padding: 12px; width: calc(100% - 24px); max-height: 90vh; }
     .mobile-nav-overlay a, .mobile-nav-overlay button.mobile-back { font-size: 15px; padding: 12px; min-height: 44px; }
-    .mobile-nav-overlay .mobile-close { right: 8px; top: 8px; }
+    
+    
+    .hamburger { width: 40px; height: 40px; display: inline-flex; }
+    .hamburger-box { width: 20px; height: 12px; }
+    .hamburger-inner, .hamburger-inner:before, .hamburger-inner:after { width: 20px; height: 2px; }
 }
 
 @keyframes menuFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
@@ -512,7 +536,7 @@ input:focus, textarea:focus {
     --gun-powder: #6a6b6e;
     --border-color: rgba(2,6,23,0.06);
     --glow-color-subtle: rgba(246,193,53,0.08);
-    --saffron: #f1c40f; /* dourado mais vivo no modo light */
+    --saffron: #c19a1b; /* dourado mais escuro e visível no modo light */
 }
 
 /* Theme toggle button in header */
@@ -544,7 +568,7 @@ input:focus, textarea:focus {
 
 [data-theme="light"] .main-header {
     /* Header em modo claro: cor sólida conforme solicitado */
-    background: #f3d691; /* cor solicitada (atualizada) */
+    background: #e8c74d; /* cor mais escura */
     border-bottom: 1px solid rgba(2,6,23,0.06);
     /* Remover blur no modo claro para manter nitidez */
     backdrop-filter: none;
@@ -552,18 +576,18 @@ input:focus, textarea:focus {
     /* restored: keep default header layout (avoid forcing alignment/padding) */
 }
 
-/* Ensure logo size in light theme doesn't push header content down */
+/* Ensure logo size in light theme matches dark theme */
 [data-theme="light"] .main-header .logo,
 [data-theme="light"] .main-header .logo-large,
 [data-theme="light"] .main-header .logo-small {
-    /* restored: do not constrain logo height here; keep original sizing */
-    height: auto;
-    max-height: none;
+    /* Match dark theme height */
+    height: 110px;
+    max-height: 110px;
 }
 
 /* Keep header appearance consistent on scroll in light mode (no color change) */
 [data-theme="light"] .main-header.is-scrolled {
-    background: #f3d691; /* same as .main-header */
+    background: #e8c74d; /* same as .main-header */
     box-shadow: none; /* remove stronger shadow on scroll for light theme */
     transform: translateY(0);
 }
@@ -575,6 +599,18 @@ input:focus, textarea:focus {
 
 [data-theme="light"] .main-nav a {
     color: var(--text-dark);
+}
+
+/* Hamburger styling for light theme */
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.2);
+    background: rgba(11,26,43,0.03);
+}
+
+[data-theme="light"] .hamburger-inner,
+[data-theme="light"] .hamburger-inner:before,
+[data-theme="light"] .hamburger-inner:after {
+    background: var(--text-light);
 }
 
 [data-theme="light"] .main-nav a.active {
@@ -652,9 +688,9 @@ input:focus, textarea:focus {
 
 /* Make chat bubbles readable in light mode */
 [data-theme="light"] .chat-box { background: transparent; }
-[data-theme="light"] .message.sent { background: linear-gradient(90deg,#e6f7ff,#d0efff); color: #05233a; }
-[data-theme="light"] .message.sent { background: linear-gradient(90deg,#d6f3ff,#bfe6ff); color: #05233a; }
-[data-theme="light"] .message.received { background: linear-gradient(180deg, #fbf7ef, #f7f3ea); color: #05233a; }
+[data-theme="light"] .message.sent { background: linear-gradient(90deg,#e6f7ff,#d0efff); color: var(--text-dark); }
+[data-theme="light"] .message.sent { background: linear-gradient(90deg,#d6f3ff,#bfe6ff); color: var(--text-dark); }
+[data-theme="light"] .message.received { background: linear-gradient(180deg, #fbf7ef, #f7f3ea); color: var(--text-dark); }
 
 /* Ensure inputs are visible in light mode */
 [data-theme="light"] input, [data-theme="light"] textarea { background: #f3f3e6; color: var(--text-dark); border: 1px solid rgba(11,26,43,0.06); }
@@ -725,6 +761,32 @@ input:focus, textarea:focus {
     border: 1px solid rgba(11,26,43,0.06); /* ensure subtle border */
 }
 
+/* Mobile nav overlay styling for light theme */
+[data-theme="light"] .mobile-nav-overlay {
+    background: rgba(232, 199, 77, 0.95);
+}
+
+[data-theme="light"] .mobile-nav-overlay .mobile-nav-panel {
+    background: rgba(232, 199, 77, 0.98);
+    box-shadow: 0 24px 80px rgba(11,26,43,0.15);
+}
+
+[data-theme="light"] .mobile-nav-overlay a,
+[data-theme="light"] .mobile-nav-overlay button.mobile-back,
+[data-theme="light"] .mobile-nav-overlay li {
+    color: var(--text-dark);
+}
+
+[data-theme="light"] .mobile-nav-overlay a:hover,
+[data-theme="light"] .mobile-nav-overlay button.mobile-back:hover {
+    background: rgba(11,26,43,0.08);
+    color: #a87f1a;
+}
+
+[data-theme="light"] .mobile-nav-overlay a.active {
+    color: #a87f1a;
+}
+
 /* Center the upload/change-photo button under the profile photo */
 .profile-picture-upload {
     display: flex;
@@ -792,7 +854,7 @@ input:focus, textarea:focus {
 
 [data-theme="light"] .registration-container .form-group label,
 [data-theme="light"] .selection-container .card-description {
-    color: #e2e8f0; /* labels e descrições mais visíveis */
+    color: #0b1a2b; /* labels e descrições mais visíveis - escuro para theme light */
 }
 
 /* Improve premium plan text readability in light theme */
@@ -1197,6 +1259,7 @@ input:focus, textarea:focus {
     color: var(--saffron);
     font-size: 2rem;
     margin-bottom: 0.5rem;
+    margin-top: 5rem;
 }
 .form-group label {
     color: var(--bali-hai);
@@ -1702,7 +1765,7 @@ input:focus, textarea:focus {
 }
 
 /* Painel lateral de acessibilidade */
-.a11y-panel { position: fixed; right: 14px; top: 30%; z-index: 1400; display: flex; align-items: center; }
+.a11y-panel { position: fixed; right: 20px; bottom: 30px; z-index: 1400; display: flex; align-items: center; flex-direction: column; gap: 12px; }
 .a11y-panel .a11y-toggle { background: var(--accent-blue); color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.32); width:56px; height:56px; font-size: 1.25rem; display:inline-flex; align-items:center; justify-content:center; }
 .a11y-panel .a11y-body { display: none; margin-right: 12px; width: 420px; max-width: calc(100vw - 30px); max-height: 80vh; overflow: auto; background: linear-gradient(145deg, var(--gun-powder), #2d3047); border-radius: 12px; padding: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.5); color: var(--text-light); box-sizing: border-box; word-break: break-word; white-space: normal; }
 .a11y-panel.open .a11y-body { display: block; }
@@ -1727,7 +1790,7 @@ input:focus, textarea:focus {
     padding: 6px 8px;
     border-radius: 8px;
     box-shadow: 0 8px 28px rgba(255,214,10,0.12), 0 0 18px rgba(255,214,10,0.06) inset;
-    color: #081226;
+    color: var(--saffron);
     font-weight: 800;
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
@@ -1839,7 +1902,7 @@ input:focus, textarea:focus {
 /* Botão Voltar nas telas de login/registro: garantir contraste com o container */
 .registration-container .btn-secondary,
 .login-visual .btn-secondary {
-    background: rgba(3,6,18,0.80); /* mais escuro que o container */
+    background: rgba(15,23,36,0.6); /* mais escuro que o container */
     color: #ffffff; /* fonte legível */
     border: 1px solid rgba(255,255,255,0.06);
     box-shadow: 0 8px 20px rgba(2,6,23,0.45);
@@ -1915,6 +1978,39 @@ input:focus, textarea:focus {
 .a11y-option-btn:focus { outline: 3px solid rgba(0,114,178,0.18); outline-offset: 3px; }
 .a11y-option-small { margin-left:8px; padding:6px 8px; border-radius:8px; background: transparent; color:var(--saffron); border:1px solid rgba(255,255,255,0.06); font-weight:700; }
 .a11y-cvd-row { display:flex; gap:8px; align-items:center; }
+
+/* ================= Accessibility panel styles (merged from Elance) ================= */
+.accessibility-panel { position: fixed; top: 20px; right: 20px; z-index: 9999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.toggle-btn { padding: 12px 18px; border-radius: 8px; background: linear-gradient(90deg, var(--accent-blue), #2aa0f6); color: white; border: none; cursor: pointer; font-size: 16px; font-weight: 600; display:flex; align-items:center; gap:8px; }
+.accessibility-menu { position: absolute; top: 60px; right: 0; background: linear-gradient(145deg, var(--gun-powder), #2d3047); color: var(--text-light); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); width: 320px; max-height: 80vh; overflow-y: auto; padding: 20px; }
+.accessibility-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.accessibility-header h2 { margin:0; font-size:18px; color:var(--saffron) }
+.zoom-controls { display:flex; align-items:center; justify-content:space-around; gap:8px }
+.zoom-btn { width:36px; height:36px; border-radius:6px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.04); cursor:pointer }
+#zoom-value { font-weight:600; color:var(--text-light); min-width:50px; text-align:center }
+.checkbox-label { display:flex; align-items:center; gap:10px; cursor:pointer }
+.checkbox-label input[type="checkbox"] { width:20px; height:20px; }
+.theme-selector { display:grid; grid-template-columns: repeat(6, 1fr); gap:8px; padding:8px 0 }
+.cb-btn { padding:10px 8px; border:2px solid rgba(255,255,255,0.06); background:transparent; border-radius:6px; cursor:pointer }
+.reading-btn { padding:10px; background:transparent; color:var(--saffron); border:2px solid rgba(255,255,255,0.06); border-radius:6px }
+.reset-btn { width:100%; padding:10px; background: transparent; border:1px solid rgba(255,255,255,0.04); border-radius:6px }
+
+/* High contrast */
+body.high-contrast-mode { background-color: #000 !important; color: #fff !important; }
+body.high-contrast-mode a { color: #ffff00 !important; text-decoration: underline !important; }
+
+/* Highlight links */
+body.highlight-links-mode a { background-color: #ffff00 !important; color: #000 !important; padding:4px 6px !important; border-radius:4px !important; text-decoration: underline !important; }
+
+/* Colorblind classes use SVG filters (injected by JS) */
+body.colorblind-protanopia { filter: url(#protanopia-filter) !important; }
+body.colorblind-deuteranopia { filter: url(#deuteranopia-filter) !important; }
+body.colorblind-tritanopia { filter: url(#tritanopia-filter) !important; }
+
+@media (max-width: 600px) {
+    .accessibility-panel { top: 10px; right: 10px }
+    .accessibility-menu { width: calc(100vw - 30px); max-height: 70vh; top: 55px }
+}
 
 
 
@@ -2075,16 +2171,26 @@ input:focus, textarea:focus {
 
     .header-row {
         gap: 0.6rem;
+        align-items: center;
     }
 
     .header-controls {
         flex-direction: column;
-        align-items: stretch;
+        align-items: center;
         width: 100%;
+        gap: 0.8rem;
     }
 
     .profile-area {
         justify-content: space-between;
+        align-items: center;
+    }
+
+    .profile-photo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
     }
 
     /* On smaller screens hide desktop links and show hamburger */
@@ -2163,12 +2269,64 @@ input:focus, textarea:focus {
 .mobile-nav-overlay {
     padding: 0.8rem;
 }
-.mobile-nav-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.mobile-nav-panel ul { width: 100%; max-width: 520px; }
-.mobile-nav-panel li { width: 100%; }
-.mobile-nav-panel a, .mobile-nav-panel button { width: 100%; }
+.mobile-nav-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.mobile-nav-panel ul { width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.mobile-nav-panel li { width: 100%; display: flex; justify-content: center; }
+.mobile-nav-panel a, .mobile-nav-panel button { width: 100%; text-align: center; }
 
 /* Make sure the header only shows logo + hamburger on small screens */
 @media (max-width: 480px) {
     .hamburger { width: 40px; height: 40px; }
+    
+    .profile-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .profile-name {
+        display: none;
+    }
+}
+
+/* ==========================================================
+   FORÇAR LAYOUT VERTICAL PARA CARDS DA PÁGINA INICIAL
+   APLICA SOMENTE EM MOBILE (≤768px) PARA NÃO QUEBRAR DESKTOP
+   ========================================================== */
+@media (max-width: 768px) {
+  .selection-page .selection-options,
+  .selection-options,
+  .selection-row,
+  .selection-horizontal .selection-options {
+      display: flex !important;
+      flex-direction: column !important;
+      flex-wrap: wrap !important;
+      gap: 1rem !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+  }
+
+  .selection-card {
+      flex: 0 0 auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+  }
+
+  .selection-card .card-icon,
+  .logo-large,
+  .logo-small {
+      max-width: 100% !important;
+      height: auto !important;
+  }
+
+  /* Garantir que botões e textos não causem overflow */
+  .selection-button,
+  .selection-card > * {
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+  }
 }

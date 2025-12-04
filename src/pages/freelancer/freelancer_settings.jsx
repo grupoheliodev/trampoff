@@ -43,7 +43,12 @@ const FreelancerSettings = () => {
     };
 
     const confirmAndSavePlan = async (plan) => {
-        const prices = { Free: 'R$0,00', Basic: 'R$19,90', Pro: 'R$49,90' };
+        // Require at least one saved payment method to activate paid plan
+        if (plan === 'Pro' && (!paymentMethods || paymentMethods.length === 0)) {
+            await alert('Para ativar o plano Pro, adicione um cartão em Configurações de Pagamento.');
+            return;
+        }
+        const prices = { Free: 'R$0,00', Pro: 'R$49,90' };
         const amount = prices[plan] || 'R$0,00';
         const ok = await confirm({ title: 'Confirmar compra', message: `Você está prestes a assinar o plano ${plan} por ${amount}. Confirma a cobrança e ativação do plano?` });
         if (!ok) return;
@@ -142,6 +147,7 @@ const FreelancerSettings = () => {
         if (!confirmed) return;
         try {
             localStorage.removeItem('trampoff_users');
+            localStorage.removeItem('messages');
             localStorage.removeItem('trampoff_messages');
             localStorage.removeItem('user');
             localStorage.removeItem('token');
@@ -273,24 +279,7 @@ const FreelancerSettings = () => {
                             </div>
                         </div>
 
-                        <div className={`plan-card ${currentPlan === 'Basic' ? 'active-plan' : ''}`}>
-                            <div>
-                                <h3>Basic</h3>
-                                <p>Destaque simples no fluxo — R$19,90/mês (visual)</p>
-                            </div>
-                            <div>
-                                <button
-                                    className="card-button"
-                                    onClick={() => confirmAndSavePlan('Basic')}
-                                    disabled={currentPlan === 'Basic'}
-                                    aria-disabled={currentPlan === 'Basic'}
-                                    title={currentPlan === 'Basic' ? 'Plano atualmente ativo' : 'Ativar Basic'}
-                                >
-                                    {currentPlan === 'Basic' ? 'Ativo' : 'Ativar Basic'}
-                                </button>
-                            </div>
-                        </div>
-
+                        {/* Basic plan removed: only Pro is available */}
                         <div className={`plan-card ${currentPlan === 'Pro' ? 'active-plan' : ''}`}>
                             <div>
                                 <h3>Pro</h3>
@@ -312,9 +301,9 @@ const FreelancerSettings = () => {
                 </div>
 
                 <div className="card settings-section reset-card">
-                    <h2 className="settings-title">Dados Locais</h2>
-                    <p>Limpe todos os dados salvos localmente (usuários, mensagens, token).</p>
-                    <button className="reset-button" onClick={clearLocalData}>Limpar Dados Locais</button>
+                    <h2 className="settings-title">Dados</h2>
+                    <p>Limpe seus dados salvos (usuários, mensagens, token).</p>
+                    <button className="reset-button" onClick={clearLocalData}>Limpar Dados</button>
                 </div>
             </main>
         </div>

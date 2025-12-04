@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../components/Header';
 import ProfileModal from '../../components/ProfileModal';
-import { getReviewsForUser, getReviewStatsForUser } from '../../services/api';
+import { getReviewsForUser, getReviewStatsForUser, updateUserPhotoUrl } from '../../services/api';
 import perfilFreelancer from '../../assets/imgs/perfil_freelancer.png';
 
 const FreelancerProfile = () => {
@@ -31,13 +31,7 @@ const FreelancerProfile = () => {
     const handlePhotoUrlSave = async () => {
         if (!user?.id || !photoUrlInput) return;
         try {
-            const resp = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/users/${user.id}/photo`, {
-                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photo: photoUrlInput })
-            });
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err?.error || 'Falha ao salvar URL da foto');
-            }
+            await updateUserPhotoUrl(user.id, photoUrlInput);
             setProfilePicture(photoUrlInput);
             updateUser({ ...user, photo: photoUrlInput });
         } catch (e) {
@@ -106,7 +100,7 @@ const FreelancerProfile = () => {
                                 ))}
                             </div>
                         </div>
-                        <button className="card-button">Editar Perfil</button>
+                        <button className="card-button" onClick={() => navigate('/freelancer/settings')}>Editar Perfil</button>
                     </div>
                 </section>
             </main>
