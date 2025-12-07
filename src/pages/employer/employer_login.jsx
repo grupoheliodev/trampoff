@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../components/AlertProvider';
-import logo from '../../assets/imgs/logo_escuro.png';
-import logoLight from '../../assets/imgs/logo_claro.png';
+import logo from '../../assets/imgs/logojovialescuro.png';
+import logoLight from '../../assets/imgs/logojovialclara.png';
 import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const EmployerLogin = () => {

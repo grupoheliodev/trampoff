@@ -8,8 +8,8 @@ const ASSETS_TO_CACHE = [
   `${prefix}/`,
   `${prefix}/index.html`,
   `${prefix}/offline.html`,
-  `${prefix}/logo_escuro.png`,
-  `${prefix}/src/assets/imgs/logo_escuro.png`,
+  `${prefix}/logojovialescuro.png`,
+  `${prefix}/src/assets/imgs/logojovialescuro.png`,
   `${prefix}/icons/icon-192.png`,
   `${prefix}/icons/icon-512.png`
 ];

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/imgs/logo_escuro.png';
-import logoLight from '../assets/imgs/logo_claro.png';
+import logo from '../assets/imgs/logojovialescuro.png';
+import logoLight from '../assets/imgs/logojovialclara.png';
 import freelancerIcon from '../assets/imgs/freelancer_icon.png';
 import employerIcon from '../assets/imgs/employer_icon.png';
 import ThemeAwareImage from '../components/ThemeAwareImage';

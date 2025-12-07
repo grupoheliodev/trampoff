@@ -26,6 +26,18 @@ function applyPrefs(p) {
     });
   };
 
+  // Ensure text scaling can also add a CSS class so we can apply global zoom as fallback
+  try {
+    const scaled = (p.textScale && Number(p.textScale) !== 1);
+    if (scaled) {
+      document.documentElement.classList.add('a11y-text-scaled');
+      document.body.classList.add('a11y-text-scaled');
+    } else {
+      document.documentElement.classList.remove('a11y-text-scaled');
+      document.body.classList.remove('a11y-text-scaled');
+    }
+  } catch (e) {}
+
   toggleClass(p.highContrast, 'a11y-high-contrast');
   toggleClass(p.reduceMotion, 'a11y-reduce-motion');
   toggleClass(p.highlightLinks, 'a11y-highlight-links');
@@ -61,7 +73,16 @@ export default function AccessibilityPanel() {
 
   const toggle = (key) => setPrefs(prev => ({ ...prev, [key]: !prev[key] }));
 
-  const setTextScale = (value) => setPrefs(prev => ({ ...prev, textScale: Number(value) }));
+  const MIN_TEXT_SCALE = 1.0;
+  const MAX_TEXT_SCALE = 1.5;
+  const TEXT_STEP = 0.01;
+
+  const setTextScale = (value) => {
+    let v = Number(value);
+    if (Number.isNaN(v)) v = MIN_TEXT_SCALE;
+    v = Math.max(MIN_TEXT_SCALE, Math.min(MAX_TEXT_SCALE, v));
+    setPrefs(prev => ({ ...prev, textScale: v }));
+  };
 
   // draggable support
     const panelRef = useRef(null);
@@ -74,7 +95,10 @@ export default function AccessibilityPanel() {
       const panel = panelRef.current;
       const viewportHeight = window.innerHeight || 0;
       const panelHeight = panel ? panel.offsetHeight : 0;
-      const minY = 80;
+      // try to avoid overlapping the header: use header height if present
+      const headerEl = document.querySelector('.main-header');
+      const headerHeight = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const minY = Math.max(120, Math.ceil(headerHeight + 8));
       const maxY = Math.max(minY, viewportHeight - panelHeight - 80);
       if (typeof rawY !== 'number' || Number.isNaN(rawY)) return null;
       return Math.min(Math.max(rawY, minY), maxY);
@@ -145,13 +169,26 @@ export default function AccessibilityPanel() {
       return () => window.removeEventListener('resize', handleResize);
   }, [open, clampY]);
 
-  const topValue = positionY != null ? positionY : '30%';
+    const topValue = positionY != null ? positionY : null;
 
-  return (
+    const style = { position: 'fixed', right: 14, zIndex: 1400 };
+    // Decide initial placement: on small screens keep at bottom, on large screens prefer top (below header)
+    const isSmall = (typeof window !== 'undefined' ? window.innerWidth < 880 : false);
+    const placement = topValue != null ? 'top' : (isSmall ? 'bottom' : 'top');
+    if (topValue != null) style.top = topValue;
+    else if (isSmall) style.bottom = 30; // fallback to bottom positioning on small
+    else {
+      // default top placement under header
+      const headerEl = typeof document !== 'undefined' ? document.querySelector('.main-header') : null;
+      const headerHeight = headerEl ? headerEl.getBoundingClientRect().height : 80;
+      style.top = Math.max( (headerHeight + 12), 24 );
+    }
+
+    return (
     <div
-      className={`a11y-panel ${open ? 'open' : ''}`}
+      className={`a11y-panel ${open ? 'open' : ''} placement-${placement}`}
       aria-hidden={!open}
-      style={{ position: 'fixed', top: topValue, right: 14, zIndex: 1400 }}
+      style={style}
       ref={panelRef}
     >
       <button
@@ -179,12 +216,16 @@ export default function AccessibilityPanel() {
               </div>
               <input
                 type="range"
-                min="1"
-                max="1.5"
-                step="0.05"
+                min={MIN_TEXT_SCALE}
+                max={MAX_TEXT_SCALE}
+                step={TEXT_STEP}
                 value={prefs.textScale}
                 onChange={(e) => setTextScale(e.target.value)}
                 aria-label="Ajustar tamanho do texto"
+                aria-valuemin={MIN_TEXT_SCALE}
+                aria-valuemax={MAX_TEXT_SCALE}
+                aria-valuenow={prefs.textScale}
+                style={{ ['--a11y-scale-percent']: `${Math.round(((prefs.textScale - MIN_TEXT_SCALE) / (MAX_TEXT_SCALE - MIN_TEXT_SCALE)) * 100)}%` }}
               />
             </div>
           </div>

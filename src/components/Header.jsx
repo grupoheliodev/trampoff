@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { getUsers, getJobs, getNotifications, unifiedSearch } from '../services/api';
-import logo from '../assets/imgs/logo_escuro.png';
+import logo from '../assets/imgs/logojovialescuro.png';
 import perfilFreelancer from '../assets/imgs/perfil_freelancer.png';
 import perfilEmployer from '../assets/imgs/perfil_employer.png';
 
 import ThemeAwareImage from './ThemeAwareImage';
-import logoLight from '../assets/imgs/logo_claro.png';
+import logoLight from '../assets/imgs/logojovialclara.png';
 
 const Header = ({ userType, username, onProfileClick, profilePicture }) => {
     const { user } = useAuth();
@@ -225,38 +225,25 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
                     {mobileOpen && (
                         <div id="mobile-menu" className="mobile-nav-overlay" role="menu" aria-label="Menu móvel" onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){} }}>
                             <div ref={panelRef} className="mobile-nav-panel" role="presentation" onClick={(e) => e.stopPropagation()}>
-                                <div className="mobile-profile" style={{ marginBottom: 12, textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center', marginBottom: 8 }}>
-                                        <div className="profile-photo" style={{ width: 64, height: 64 }}>
-                                            <img src={profileImg} alt="Foto de Perfil" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                        <div style={{ textAlign: 'left' }}>
-                                            <div style={{ fontWeight: 800, color: 'var(--text-light)' }}>{username || 'Usuário'}</div>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-medium)' }}>{isFreelancer ? 'Freelancer' : 'Empregador'}</div>
-                                        </div>
-                                    </div>
-                                    {isFreelancer && (
-                                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                                            <NavLink to={isFreelancer ? '/freelancer/profile' : '/employer/profile'} onClick={() => setMobileOpen(false)} className="btn btn-secondary">Perfil</NavLink>
-                                            <button className="btn btn-danger" onClick={() => { setMobileOpen(false); onProfileClick && onProfileClick(); }}>Editar</button>
-                                        </div>
-                                    )}
-                                </div>
-
-
-                                <ul>
-                                    {navLinks.map(link => (
-                                        <li key={link.path} style={{ marginBottom: 6 }}>
-                                            <NavLink to={link.path} className={({ isActive }) => isActive ? "active" : ""} onClick={() => setMobileOpen(false)}>
-                                                {link.label}
-                                            </NavLink>
+                                    <ul>
+                                        {navLinks.map(link => (
+                                            <li key={link.path} style={{ marginBottom: 6 }}>
+                                                <NavLink to={link.path} className={({ isActive }) => isActive ? "active" : ""} onClick={() => setMobileOpen(false)}>
+                                                    {link.label}
+                                                </NavLink>
+                                            </li>
+                                        ))}
+                                        <li className="mobile-separator" aria-hidden></li>
+                                        <li className="mobile-logout-wrap" aria-hidden>
+                                            <button
+                                                className="card-button mobile-logout"
+                                                onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){}; /* placeholder for logout */ }}
+                                                aria-label="Sair"
+                                            >
+                                                Sair
+                                            </button>
                                         </li>
-                                    ))}
-                                    <li className="mobile-separator" aria-hidden></li>
-                                    <li style={{ marginTop: 8 }}>
-                                        <button className="card-button" onClick={() => { setMobileOpen(false); try { hamburgerRef.current && hamburgerRef.current.focus(); } catch(e){}; /* placeholder for logout */ }} style={{ width: '100%' }}>Sair</button>
-                                    </li>
-                                </ul>
+                                    </ul>
                             </div>
                         </div>
                     )}

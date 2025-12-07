@@ -12,8 +12,10 @@
     --regent-gray: #97a6bd;
 
     /* Cores para o Novo Design Otimizado */
-    --bg-gradient-start: #13183a;
-    --bg-gradient-end: #0a0e23;
+    --bg-gradient-start: #04477c; /* área mais clara do fundo (site) */
+    --bg-gradient-end: #06385d; /* área mais escura do fundo/header */
+    --header-bg-dark: #06385d; /* cor principal do header no modo escuro */
+    --header-bg-dark-rgba: rgba(6,56,93,0.92);
     --border-color: rgba(132, 149, 169, 0.15); /* Borda mais subtil */
     --text-light: #e0e6ed;
     --text-medium: #a8b3bf;
@@ -113,12 +115,13 @@ input:focus, textarea:focus {
 .main-header {
     padding: 0.6rem 1.2rem 0.8rem;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row; /* usar linha em telas largas para manter header compacto */
+    align-items: center; /* centraliza logo e controles verticalmente */
+    justify-content: space-between;
     gap: 0.5rem;
     position: relative;
     z-index: 1000;
-    background: rgba(25, 31, 68, 0.85);
+    background: var(--header-bg-dark-rgba); /* usa a cor escura solicitada */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
@@ -127,20 +130,33 @@ input:focus, textarea:focus {
 
 .main-header.is-scrolled {
     transform: translateY(-16px);
-    background: rgba(20, 26, 58, 0.92);
+    background: rgba(6,56,93,0.98); /* tom levemente mais escuro ao rolar */
     box-shadow: 0 18px 38px rgba(0,0,0,0.45);
 }
 
 .logo {
-    height: 110px; /* tamanho reduzido e unificado para ambas variações (claro/escuro) */
+    height: 180px; /* aumentado para deixar mais visível no header */
     width: auto;
-    max-height: 110px;
+    max-height: 180px;
     border-radius: 0; /* sem círculo em volta da logo principal */
     display: flex;
     transition: transform var(--transition-speed);
   
 }
 .logo:hover { transform: scale(1.04); }
+
+/* Garantir que, independentemente do arquivo (claro/escuro), a logo exibida no header
+   tenha sempre a mesma altura visual. Aplicamos apenas às classes de logo para não
+   afetar ícones menores que também usam `theme-adaptable`. */
+.main-header .logo.theme-adaptable,
+.main-header .logo-large.theme-adaptable,
+.main-header .logo-small.theme-adaptable,
+.logo.theme-adaptable {
+    height: 180px !important;
+    max-height: 180px !important;
+    width: auto !important;
+    object-fit: contain !important;
+}
 
 .logo-button {
     flex: 0 0 auto;
@@ -264,7 +280,7 @@ input:focus, textarea:focus {
     transform: translateX(-50%);
     transition: transform 200ms ease, opacity 200ms ease;
 }
-.hamburger-inner { top: 6px; }
+.hamburger-inner { top: 0; }
 .hamburger-inner:before { content: ''; top: -6px; }
 .hamburger-inner:after { content: ''; top: 6px; }
 .hamburger.is-open .hamburger-inner { transform: translateX(-50%) rotate(45deg); }
@@ -279,8 +295,11 @@ input:focus, textarea:focus {
 [data-theme="light"] .hamburger-inner,
 [data-theme="light"] .hamburger-inner:before,
 [data-theme="light"] .hamburger-inner:after {
-    background: var(--text-light);
+    background: var(--text-dark);
 }
+
+/* Ensure dark theme hamburger uses light strokes and no extra borders */
+[data-theme="dark"] .hamburger { border-color: rgba(255,255,255,0.08); background: transparent; }
 
 /* Mobile overlay menu — centered */
 .mobile-nav-overlay {
@@ -292,7 +311,7 @@ input:focus, textarea:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.96); /* darker background per request */
+    background: rgba(0,0,0,0.96); /* default (dark) overlay */
     z-index: 4000;
     padding: 1.25rem;
     animation: menuFadeIn 160ms ease-out;
@@ -356,6 +375,40 @@ input:focus, textarea:focus {
     .hamburger { width: 40px; height: 40px; display: inline-flex; }
     .hamburger-box { width: 20px; height: 12px; }
     .hamburger-inner, .hamburger-inner:before, .hamburger-inner:after { width: 20px; height: 2px; }
+}
+
+/* Ensure hamburger is visible on small/medium screens (<=768px) */
+@media (max-width: 768px) {
+    .hamburger { display: inline-flex !important; }
+}
+
+/* Light theme: force visible hamburger button and the requested inner-bar color */
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.12) !important;
+    background: transparent !important;
+}
+[data-theme="light"] .hamburger .hamburger-inner,
+[data-theme="light"] .hamburger .hamburger-inner:before,
+[data-theme="light"] .hamburger .hamburger-inner:after {
+    background: #F0E1B8 !important;
+}
+
+/* Extra visibility rules: make hamburger visible on slightly larger mobile/tablet
+   sizes and ensure it sits above the header content. */
+@media (max-width: 1024px) {
+    .hamburger { display: inline-flex !important; z-index: 1100 !important; }
+}
+
+/* Light theme: stronger border so the button is visible against pale headers */
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.18) !important;
+    box-shadow: none !important;
+}
+
+/* Make the "Não Possui Cadastro?" paragraph readable in dark mode (white) */
+[data-theme="dark"] .login_paragraph p,
+[data-theme="dark"] .login_paragraph {
+    color: #FFFFFF !important;
 }
 
 @keyframes menuFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
@@ -528,15 +581,18 @@ input:focus, textarea:focus {
 
 /* Theme: Light overrides (applied when documentElement has data-theme="light") */
 [data-theme="light"] {
-    --bg-gradient-start: #e7ca86;
-    --bg-gradient-end: #ebdebe;
+    /* Light theme palette updated per request */
+    --bg-gradient-start: #fef9e6; /* área mais clara do fundo (site) */
+    --bg-gradient-end: #f0e1bb;   /* área mais escura do fundo / header */
     --text-light: #0f1724;
     --text-medium: #475569;
     --text-dark: #0b1a2b;
     --gun-powder: #6a6b6e;
-    --border-color: rgba(2,6,23,0.06);
-    --glow-color-subtle: rgba(246,193,53,0.08);
-    --saffron: #c19a1b; /* dourado mais escuro e visível no modo light */
+    --border-color: rgba(11,26,43,0.06);
+    --glow-color-subtle: rgba(246,193,53,0.06);
+    --saffron: #c19a1b;
+    --header-bg-light: #f0e1bb;
+    --header-bg-light-rgba: rgba(240,225,187,0.95);
 }
 
 /* Theme toggle button in header */
@@ -567,13 +623,11 @@ input:focus, textarea:focus {
 }
 
 [data-theme="light"] .main-header {
-    /* Header em modo claro: cor sólida conforme solicitado */
-    background: #e8c74d; /* cor mais escura */
-    border-bottom: 1px solid rgba(2,6,23,0.06);
-    /* Remover blur no modo claro para manter nitidez */
+    /* Header em modo claro: usar a nova cor solicitada */
+    background: var(--header-bg-light-rgba);
+    border-bottom: 1px solid rgba(11,26,43,0.06);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    /* restored: keep default header layout (avoid forcing alignment/padding) */
 }
 
 /* Ensure logo size in light theme matches dark theme */
@@ -581,14 +635,14 @@ input:focus, textarea:focus {
 [data-theme="light"] .main-header .logo-large,
 [data-theme="light"] .main-header .logo-small {
     /* Match dark theme height */
-    height: 110px;
-    max-height: 110px;
+    height: 180px !important;
+    max-height: 180px !important;
 }
 
 /* Keep header appearance consistent on scroll in light mode (no color change) */
 [data-theme="light"] .main-header.is-scrolled {
-    background: #e8c74d; /* same as .main-header */
-    box-shadow: none; /* remove stronger shadow on scroll for light theme */
+    background: var(--header-bg-light-rgba);
+    box-shadow: none;
     transform: translateY(0);
 }
 
@@ -618,12 +672,12 @@ input:focus, textarea:focus {
     background: rgba(11,26,43,0.04);
 }
 
-/* Ensure light-mode logo matches the normal (dark-mode) logo sizing */
-[data-theme="light"] .logo,
-[data-theme="light"] .logo-large,
-[data-theme="light"] .logo-small {
-    height: 110px !important;
-    max-height: 110px !important;
+/* Ensure header logos in light mode match the dark-mode header sizing only */
+[data-theme="light"] .main-header .logo,
+[data-theme="light"] .main-header .logo-large,
+[data-theme="light"] .main-header .logo-small {
+    height: 180px !important;
+    max-height: 180px !important;
 }
 
 [data-theme="light"] .search-bar {
@@ -992,7 +1046,7 @@ input:focus, textarea:focus {
 
 /* Em telas menores, restaurar o fluxo normal para evitar sobreposição do menu */
 @media (max-width: 880px) {
-    .main-header { padding: 0.6rem 1rem 0.7rem; }
+    .main-header { padding: 0.6rem 1rem 0.7rem; flex-direction: column; align-items: stretch; }
     .header-row {
         flex-direction: column;
         align-items: stretch;
@@ -1132,6 +1186,31 @@ input:focus, textarea:focus {
     --page-saffron: #f1c40f;     /* dourado mais vivo */
 }
 
+/* Tornar a logo maior especificamente na página inicial/seleção (não afeta login/registro) */
+.selection-page .logo-large.theme-adaptable,
+.selection-page .logo-large {
+    width: 360px !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+
+/* Aumentar logos exibidas dentro do conteúdo principal (páginas freelancer/employer)
+   sem afetar formulários de login/registro (estas têm suas próprias exceções). */
+.main-content .logo-large,
+.main-content .logo-large.theme-adaptable {
+    width: 360px !important;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.main-content .logo,
+.main-content .logo.theme-adaptable {
+    height: 150px !important;
+    max-height: 150px !important;
+    width: auto !important;
+}
+
 /* aplicar as variáveis locais nos elementos de registro/seleção */
 .registration-page .registration-title,
 .selection-page .selection-title {
@@ -1236,7 +1315,7 @@ input:focus, textarea:focus {
 }
 
 .logo-large {
-    width: 220px;
+    width: 260px; /* maior nas páginas principais */
     height: auto;
     border-radius: 0; /* tira círculo redondo das logos das telas iniciais */
     object-fit: contain;
@@ -1246,13 +1325,22 @@ input:focus, textarea:focus {
 }
 
 .logo-small {
-    width: 180px;
+    width: 220px;
     height: auto;
     border-radius: 0; /* tira círculo redondo das logos das telas iniciais */
     object-fit: contain;
     margin-bottom: 2rem;
     border: none;
     box-shadow: none;
+}
+
+/* Preserve smaller logo sizes inside login/registration pages (these already looked good) */
+.registration-page .logo-large,
+.registration-container .logo-large,
+.registration-page .logo-small,
+.registration-container .logo-small {
+    width: 220px !important;
+    height: auto !important;
 }
 
 .selection-title {
@@ -1767,8 +1855,13 @@ input:focus, textarea:focus {
 /* Painel lateral de acessibilidade */
 .a11y-panel { position: fixed; right: 20px; bottom: 30px; z-index: 1400; display: flex; align-items: center; flex-direction: column; gap: 12px; }
 .a11y-panel .a11y-toggle { background: var(--accent-blue); color: white; border-radius: 12px; padding: 12px; border: none; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.32); width:56px; height:56px; font-size: 1.25rem; display:inline-flex; align-items:center; justify-content:center; }
-.a11y-panel .a11y-body { display: none; margin-right: 12px; width: 420px; max-width: calc(100vw - 30px); max-height: 80vh; overflow: auto; background: linear-gradient(145deg, var(--gun-powder), #2d3047); border-radius: 12px; padding: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.5); color: var(--text-light); box-sizing: border-box; word-break: break-word; white-space: normal; }
+/* make the body absolute so it can open above or below the toggle without overflow */
+.a11y-panel .a11y-body { display: none; position: absolute; right: 70px; width: 420px; max-width: calc(100vw - 30px); max-height: 80vh; overflow: auto; background: linear-gradient(145deg, var(--gun-powder), #2d3047); border-radius: 12px; padding: 18px; box-shadow: 0 10px 36px rgba(0,0,0,0.5); color: var(--text-light); box-sizing: border-box; word-break: break-word; white-space: normal; }
 .a11y-panel.open .a11y-body { display: block; }
+
+/* placement variants: when panel sits near bottom, open above; when near top, open below */
+.a11y-panel.placement-bottom .a11y-body { bottom: 70px; top: auto; }
+.a11y-panel.placement-top .a11y-body { top: 70px; bottom: auto; }
 .a11y-panel h4 { margin: 0 0 8px 0; color: var(--saffron); }
 .a11y-row { margin-bottom: 8px; }
 .a11y-row label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
@@ -1786,20 +1879,239 @@ input:focus, textarea:focus {
 /* Highlight links mode */
 .a11y-highlight-links a {
     text-decoration: none;
-    background: linear-gradient(90deg, rgba(255,235,59,0.12), rgba(255,214,10,0.06));
-    padding: 6px 8px;
+    background: linear-gradient(90deg, rgba(255,235,59,0.16), rgba(255,214,10,0.08));
+    padding: 8px 10px;
     border-radius: 8px;
-    box-shadow: 0 8px 28px rgba(255,214,10,0.12), 0 0 18px rgba(255,214,10,0.06) inset;
-    color: var(--saffron);
-    font-weight: 800;
+    box-shadow: 0 12px 36px rgba(255,214,10,0.18), 0 0 18px rgba(255,214,10,0.08) inset;
+    color: var(--big-stone);
+    font-weight: 900;
+    font-size: 1.02rem;
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 .a11y-highlight-links a:hover,
 .a11y-highlight-links a:focus {
     transform: translateY(-3px);
-    box-shadow: 0 18px 48px rgba(255,214,10,0.20), 0 0 36px rgba(255,214,10,0.12) inset;
+    box-shadow: 0 20px 56px rgba(255,214,10,0.26), 0 0 40px rgba(255,214,10,0.14) inset;
     outline: none;
 }
+
+/* Light theme: use a stronger, darker gold background and dark text for contrast */
+[data-theme="light"] .a11y-highlight-links a {
+    background: linear-gradient(90deg, rgba(193,154,27,0.36), rgba(193,154,27,0.28));
+    box-shadow: 0 12px 36px rgba(11,26,43,0.06), 0 0 8px rgba(193,154,27,0.06) inset;
+    color: var(--text-dark);
+    font-weight: 900;
+    font-size: 1.04rem;
+}
+
+/* ------------------------------------------------------------------
+   Fixes: hamburger visibility (light theme), accessibility panel mobile
+   responsiveness, CVD control contrast, and remove white lines around
+   logos in high-contrast.
+   These rules are intentionally appended with high specificity to
+   override previous cascade issues.
+   ------------------------------------------------------------------ */
+
+/* Force hamburger inner bars color in light theme with high specificity (make them black) */
+html[data-theme="light"] .main-header .hamburger .hamburger-inner,
+html[data-theme="light"] .main-header .hamburger .hamburger-inner:before,
+html[data-theme="light"] .main-header .hamburger .hamburger-inner:after {
+    background: #000000 !important;
+}
+
+/* Extra-most-specific override to ensure hamburger lines are black regardless of cascade */
+header.main-header button.hamburger > .hamburger-box > .hamburger-inner,
+header.main-header button.hamburger > .hamburger-box > .hamburger-inner:before,
+header.main-header button.hamburger > .hamburger-box > .hamburger-inner:after {
+    background: #000 !important;
+    background-image: none !important;
+}
+
+/* Ensure hamburger button is visible and clickable across small/tablet breakpoints */
+@media (max-width: 1024px) {
+    html .main-header .hamburger { display: inline-flex !important; z-index: 1200 !important; }
+    html[data-theme="light"] .main-header .hamburger { border-color: rgba(11,26,43,0.22) !important; background: rgba(11,26,43,0.04) !important; }
+}
+
+/* Align hamburger inner bars consistently regardless of previous cascade */
+.main-header .hamburger-box { height: 20px !important; }
+.main-header .hamburger-inner { top: 50% !important; transform: translateX(-50%) !important; }
+.main-header .hamburger-inner:before { top: calc(50% - 6px) !important; }
+.main-header .hamburger-inner:after { top: calc(50% + 6px) !important; }
+
+/* Fallback sizing for very small screens */
+@media (max-width: 420px) {
+    .main-header .hamburger-box { height: 16px !important; }
+    .main-header .hamburger-inner:before { top: calc(50% - 5px) !important; }
+    .main-header .hamburger-inner:after { top: calc(50% + 5px) !important; }
+}
+
+/* Accessibility panel: responsive body so it never clips on small screens */
+@media (max-width: 520px) {
+    .a11y-panel { right: 12px !important; left: auto !important; }
+    .a11y-panel .a11y-body {
+        position: fixed !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 86px !important; /* sit above the toggle */
+        top: auto !important;
+        width: auto !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 140px) !important;
+        overflow: auto !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+        box-shadow: 0 18px 48px rgba(0,0,0,0.48) !important;
+        background: linear-gradient(145deg, var(--gun-powder), #2d3047) !important;
+    }
+    /* High-contrast + light theme: ensure panel content remains readable (dark text on light bg) */
+    html.a11y-high-contrast[data-theme="light"] .a11y-panel .a11y-body,
+    body.a11y-high-contrast[data-theme="light"] .a11y-panel .a11y-body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+}
+
+/* Make sure the toggle button never overflows on very small screens */
+.a11y-panel .a11y-toggle { min-width: 48px; min-height: 48px; }
+
+/* Ensure select and option in accessibility panel are readable in both themes */
+.a11y-body select, .a11y-body option {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(0,0,0,0.12) !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: var(--text-light) !important;
+}
+
+/* Ensure CVD select/options are readable when dark theme or high-contrast is active */
+html[data-theme="dark"] .a11y-body select, html[data-theme="dark"] .a11y-body option,
+html.a11y-high-contrast[data-theme="dark"] .a11y-body select, html.a11y-high-contrast[data-theme="dark"] .a11y-body option {
+    background: rgba(255,255,255,0.04) !important;
+    color: #E7F4FF !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* High-contrast + light theme: ensure the select/option text is dark and visible */
+html.a11y-high-contrast[data-theme="light"] .a11y-body select,
+html.a11y-high-contrast[data-theme="light"] .a11y-body option,
+body.a11y-high-contrast[data-theme="light"] .a11y-body select,
+body.a11y-high-contrast[data-theme="light"] .a11y-body option {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid rgba(11,26,43,0.08) !important;
+}
+
+/* Ensure accessibility panel itself is readable under high-contrast + light theme */
+html.a11y-high-contrast[data-theme="light"] .a11y-panel .a11y-body,
+body.a11y-high-contrast[data-theme="light"] .a11y-panel .a11y-body,
+html[data-theme="light"].a11y-high-contrast .a11y-panel .a11y-body {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Ensure accessibility panel is readable under high-contrast + dark theme */
+html.a11y-high-contrast[data-theme="dark"] .a11y-panel .a11y-body,
+body.a11y-high-contrast[data-theme="dark"] .a11y-panel .a11y-body {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+
+/* Ensure select/options in dark theme are readable (fallback) */
+html[data-theme="dark"] .a11y-body select,
+html[data-theme="dark"] .a11y-body option,
+body[data-theme="dark"] .a11y-body select,
+body[data-theme="dark"] .a11y-body option {
+    color: #E7F4FF !important;
+    background: rgba(255,255,255,0.03) !important;
+}
+
+/* Light theme accessibility panel should use dark text on light bg */
+html[data-theme="light"] .a11y-panel .a11y-body,
+body[data-theme="light"] .a11y-panel .a11y-body {
+    background: linear-gradient(145deg, #f8f6f0, #f1ebe1) !important;
+    color: var(--text-dark) !important;
+}
+html[data-theme="light"] .a11y-body select, html[data-theme="light"] .a11y-body option {
+    background: #ffffff !important;
+    color: var(--text-dark) !important;
+    border: 1px solid rgba(11,26,43,0.06) !important;
+}
+
+/* Dark theme accessibility select: ensure contrast */
+html[data-theme="dark"] .a11y-body select, html[data-theme="dark"] .a11y-body option {
+    background: rgba(255,255,255,0.04) !important;
+    color: var(--text-light) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Remove any remaining white outlines / borders around logos in high-contrast mode */
+.a11y-high-contrast .main-header .logo,
+.a11y-high-contrast .main-header img,
+.a11y-high-contrast .profile-photo,
+.a11y-high-contrast .profile-avatar,
+.a11y-high-contrast .logo-button img {
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+}
+
+/* Additionally, avoid bright white thin separators around the logo by removing
+   any small outline/border rules applied at lower specificity. */
+.a11y-high-contrast .main-header *,
+.a11y-high-contrast .main-header *::before,
+.a11y-high-contrast .main-header *::after {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+
+[data-theme="light"] .a11y-highlight-links a:hover,
+[data-theme="light"] .a11y-highlight-links a:focus {
+    box-shadow: 0 22px 64px rgba(11,26,43,0.08), 0 0 20px rgba(193,154,27,0.12) inset;
+    transform: translateY(-3px);
+}
+
+/* Dark theme: increase intensity to match light theme strength */
+[data-theme="dark"] .a11y-highlight-links a {
+    background: linear-gradient(90deg, rgba(255,214,10,0.36), rgba(255,193,7,0.28));
+    box-shadow: 0 14px 44px rgba(255,193,7,0.22), 0 0 22px rgba(255,193,7,0.14) inset;
+    color: var(--big-stone);
+    font-weight: 900;
+    font-size: 1.04rem;
+}
+
+[data-theme="dark"] .a11y-highlight-links a:hover,
+[data-theme="dark"] .a11y-highlight-links a:focus {
+    box-shadow: 0 26px 72px rgba(255,193,7,0.28), 0 0 36px rgba(255,193,7,0.18) inset;
+}
+
+/* Global text-scaling: prefer changing root font-size so rem-based text scales smoothly.
+   This avoids layout collapse that can happen with page-wide transforms.
+   We still provide a conservative `zoom` fallback for older browsers that don't support
+   `calc()` with CSS variables. The applied scale is clamped by the JS slider to a safe max.
+*/
+.a11y-text-scaled {
+    /* passthrough variable used by root font-size calculation */
+    --applied-a11y-scale: var(--a11y-scale, 1);
+}
+
+/* Apply scaling by adjusting the root font-size so REM-based sizing grows naturally. */
+html.a11y-text-scaled,
+:root.a11y-text-scaled {
+    font-size: calc(100% * var(--applied-a11y-scale));
+}
+
+/* Fallback for very old browsers: limit zoom so it never explodes layout. */
+@supports not (font-size: calc(100% * var(--applied-a11y-scale))) {
+    .a11y-text-scaled {
+        zoom: min(var(--applied-a11y-scale), 1.2);
+    }
+}
+
+/* Ensure fixed elements like header are not transformed by any legacy transform rules. */
+.a11y-text-scaled .main-header { transform: none !important; }
 
 /* Utility classes para destaque de links (inline e boxed) */
 .highlight-link {
@@ -1846,6 +2158,76 @@ input:focus, textarea:focus {
 
 /* Reduce motion helper */
 .a11y-reduce-motion * { transition: none !important; animation: none !important; }
+
+/* Styled range input with filled track based on --a11y-scale-percent (set inline) */
+.a11y-body input[type="range"] {
+    width: 100%;
+    height: 14px;
+    appearance: none;
+    background: linear-gradient(90deg, var(--accent-blue, #04477c), var(--accent-blue, #04477c)) left/ var(--a11y-scale-percent, 50%) 100% no-repeat, rgba(255,255,255,0.04);
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 0;
+}
+.a11y-body input[type="range"]:focus { outline: none; box-shadow: 0 6px 20px rgba(4,71,124,0.18); }
+
+/* Webkit track/thumb */
+.a11y-body input[type="range"]::-webkit-slider-runnable-track { height: 14px; border-radius: 999px; }
+.a11y-body input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: white; border: 3px solid var(--accent-blue, #04477c); margin-top: -4px; box-shadow: 0 6px 18px rgba(4,71,124,0.18); cursor: pointer; }
+
+/* Firefox */
+.a11y-body input[type="range"]::-moz-range-track { height: 14px; border-radius: 999px; background: transparent; }
+.a11y-body input[type="range"]::-moz-range-progress { background: var(--accent-blue, #04477c); height: 14px; border-radius: 999px; }
+.a11y-body input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: white; border: 3px solid var(--accent-blue, #04477c); box-shadow: 0 6px 18px rgba(4,71,124,0.18); cursor: pointer; }
+
+/* High Contrast Mode - stronger palettes and clearer outlines
+   Works with both light and dark themes; toggled by adding `.a11y-high-contrast` to <html> or <body>
+*/
+html.a11y-high-contrast[data-theme="light"], body.a11y-high-contrast[data-theme="light"] {
+    --bg: #ffffff;
+    --text-light: #000000;
+    --text-dark: #000000;
+    --accent-blue: #04477c;
+    --saffron: #ffb000;
+    --high-contrast-border: #000000;
+}
+
+html.a11y-high-contrast[data-theme="dark"], body.a11y-high-contrast[data-theme="dark"] {
+    --bg: #000000;
+    --text-light: #ffffff;
+    --text-dark: #ffffff;
+    --accent-blue: #06385d;
+    --saffron: #ffdf5a;
+    --high-contrast-border: #ffffff;
+}
+
+/* Enforce high-contrast visuals but avoid full-area saffron fills that obscure layout.
+   Use saffron as an accent (text, outlines, focus indicators) and keep large surfaces neutral.
+*/
+.a11y-high-contrast body, .a11y-high-contrast html { background-color: var(--bg) !important; color: var(--text-light) !important; }
+.a11y-high-contrast a { color: var(--saffron) !important; background: transparent !important; text-decoration: underline !important; font-weight: 800 !important; }
+
+/* Keep buttons and toggles readable but avoid filling entire UI with saffron.
+   Active states use a strong outline / border or subtle fill on small controls only.
+*/
+.a11y-high-contrast button, .a11y-high-contrast .a11y-toggle { background: transparent !important; color: var(--text-light) !important; border: 2px solid var(--high-contrast-border) !important; }
+.a11y-high-contrast .a11y-option-btn.active { background: var(--saffron) !important; color: var(--text-dark) !important; border-color: var(--saffron) !important; }
+.a11y-high-contrast .a11y-panel.open .a11y-toggle { background: var(--saffron) !important; color: var(--text-dark) !important; border-color: var(--saffron) !important; }
+.a11y-high-contrast .a11y-panel.open .a11y-toggle { background: var(--saffron) !important; color: var(--text-dark) !important; border-color: var(--saffron) !important; }
+
+/* Prevent any large header or avatar backgrounds from becoming saffron bars.
+    Use a consistent dark header background in high-contrast so the header doesn't
+    turn white in light theme. Also remove decorative borders around logo/avatar.
+*/
+.a11y-high-contrast .main-header, .a11y-high-contrast header { background: var(--header-bg-dark-rgba) !important; border-bottom: 2px solid var(--high-contrast-border) !important; }
+.a11y-high-contrast .main-header .logo, .a11y-high-contrast .profile-photo, .a11y-high-contrast .profile-avatar, .a11y-high-contrast .main-header img { background: transparent !important; box-shadow: none !important; border: none !important; }
+.a11y-high-contrast img, .a11y-high-contrast svg { filter: none !important; }
+
+.a11y-high-contrast *:focus { outline: 3px dashed var(--saffron) !important; outline-offset: 3px !important; }
+
+/* Ensure highlighted links are extra-visible under high contrast but as a clear accent, not full-surface fill */
+.a11y-high-contrast .a11y-highlight-links a { background: transparent !important; color: var(--saffron) !important; text-decoration: underline !important; box-shadow: none !important; padding: 4px 6px !important; border-radius: 4px !important; }
+
 
 /* Quando reduzir animações, garantir que elementos que começam com opacity:0
    por causa das animações fiquem visíveis — não os ocultar. */
@@ -1975,6 +2357,20 @@ input:focus, textarea:focus {
 .a11y-option-btn .a11y-ico { font-weight:900; font-size:1.05rem; display:inline-block; width:26px; text-align:center; }
 .a11y-option-btn .a11y-label { font-size:0.92rem; }
 .a11y-option-btn.active { background: linear-gradient(90deg, var(--accent-blue), #2aa0f6); color:white; border-color: transparent; box-shadow: 0 8px 20px rgba(0,114,178,0.14); }
+.a11y-option-btn.active { position: relative; }
+.a11y-option-btn.active::after {
+    content: '\2713';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.9);
+    color: var(--accent-blue);
+    border-radius: 4px;
+    padding: 0 6px;
+    font-weight: 900;
+    font-size: 0.9rem;
+}
 .a11y-option-btn:focus { outline: 3px solid rgba(0,114,178,0.18); outline-offset: 3px; }
 .a11y-option-small { margin-left:8px; padding:6px 8px; border-radius:8px; background: transparent; color:var(--saffron); border:1px solid rgba(255,255,255,0.06); font-weight:700; }
 .a11y-cvd-row { display:flex; gap:8px; align-items:center; }
@@ -2274,6 +2670,123 @@ body.colorblind-tritanopia { filter: url(#tritanopia-filter) !important; }
 .mobile-nav-panel li { width: 100%; display: flex; justify-content: center; }
 .mobile-nav-panel a, .mobile-nav-panel button { width: 100%; text-align: center; }
 
+/* Theme-specific mobile panel colors */
+[data-theme="light"] .mobile-nav-overlay {
+    background: rgba(232,199,77,0.92); /* softer light overlay matching header */
+}
+[data-theme="light"] .mobile-nav-overlay .mobile-nav-panel {
+    background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-dark);
+    border-radius: 14px;
+    border: 1px solid rgba(11,26,43,0.08);
+    box-shadow: 0 20px 60px rgba(11,26,43,0.12);
+}
+
+[data-theme="dark"] .mobile-nav-overlay {
+    background: rgba(2,6,23,0.96);
+}
+[data-theme="dark"] .mobile-nav-overlay .mobile-nav-panel {
+    background: linear-gradient(180deg, #0f1828, #0b1220);
+    color: var(--text-light);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* Mobile links inside the panel should match theme text colors */
+.mobile-nav-panel a { color: inherit; }
+.mobile-nav-panel .card-button.mobile-logout { color: inherit; }
+
+/* High contrast mobile panel */
+.a11y-high-contrast .mobile-nav-overlay,
+html.a11y-high-contrast .mobile-nav-overlay {
+    background: rgba(0,0,0,0.98) !important;
+}
+.a11y-high-contrast .mobile-nav-overlay .mobile-nav-panel,
+html.a11y-high-contrast .mobile-nav-overlay .mobile-nav-panel {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+
+/* Mobile-specific adjustments: make the panel start below the header, fill width and avoid side color mismatch */
+@media (max-width: 768px) {
+    .mobile-nav-overlay {
+        align-items: flex-start;
+        padding-top: 16px; /* reduced space so panel is closer to header */
+        background: rgba(0,0,0,0.96);
+    }
+    /* Force overlay background to match panel so there are no visible side stripes */
+    [data-theme="light"] .mobile-nav-overlay { background: rgba(240,225,187,0.96); }
+    .mobile-nav-overlay .mobile-nav-panel {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border-radius: 0;
+        padding: 12px 10px;
+        box-shadow: none;
+    }
+    [data-theme="light"] .mobile-nav-overlay .mobile-nav-panel { background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end)); }
+}
+
+/* Ensure logout button is highlighted in dark theme too */
+[data-theme="dark"] .mobile-logout {
+    background: var(--saffron) !important;
+    color: var(--big-stone) !important;
+    border-color: rgba(0,0,0,0.06) !important;
+}
+[data-theme="dark"] .mobile-logout:hover { box-shadow: 0 14px 36px rgba(2,6,23,0.16) !important; transform: translateY(-2px) !important; }
+
+.mobile-separator { width: 100%; }
+
+/* Separator visual rules (no inline styles) */
+.mobile-separator {
+    margin: 12px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="light"] .mobile-separator {
+    border-top: 1px solid rgba(11,26,43,0.06);
+}
+
+.mobile-logout-wrap { width: 100%; margin-top: 8px; }
+.mobile-logout { width: 100%; }
+
+/* Mobile logout button styling: standout from page links */
+.mobile-logout {
+    background: var(--saffron);
+    color: var(--big-stone);
+    font-weight: 900;
+    border: 2px solid rgba(0,0,0,0.06);
+    box-shadow: 0 10px 24px rgba(2,6,23,0.12);
+}
+.mobile-logout:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(2,6,23,0.16); }
+
+/* Ensure mobile nav links remain simple and not highlighted like action buttons */
+.mobile-nav-panel a { background: transparent; color: var(--text-light); font-weight: 700; padding: 12px 16px; border-radius: 10px; }
+.mobile-nav-panel a.active { background: rgba(255,255,255,0.04); }
+
+/* Hamburger colors: in light mode use header / background colors to blend */
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.18);
+    background: var(--header-bg-light-rgba);
+}
+[data-theme="light"] .hamburger-inner,
+[data-theme="light"] .hamburger-inner:before,
+[data-theme="light"] .hamburger-inner:after {
+    background: var(--bg-gradient-start);
+}
+
+[data-theme="dark"] .hamburger {
+    border-color: rgba(255,255,255,0.08);
+    background: transparent;
+}
+[data-theme="dark"] .hamburger-inner,
+[data-theme="dark"] .hamburger-inner:before,
+[data-theme="dark"] .hamburger-inner:after {
+    background: var(--text-light);
+}
+
 /* Make sure the header only shows logo + hamburger on small screens */
 @media (max-width: 480px) {
     .hamburger { width: 40px; height: 40px; }
@@ -2289,6 +2802,172 @@ body.colorblind-tritanopia { filter: url(#tritanopia-filter) !important; }
         display: none;
     }
 }
+
+/* Final overrides: ensure hamburger uses consistent theme colors and no black borders.
+   These rules are placed late in the file and use higher specificity and !important
+   to override earlier declarations coming from build/dist or duplicated blocks. */
+[data-theme="light"] .main-header .hamburger,
+[data-theme="light"] .hamburger {
+    border-color: rgba(11,26,43,0.18) !important;
+    background: var(--header-bg-light-rgba) !important;
+    box-shadow: none !important;
+}
+[data-theme="light"] .main-header .hamburger .hamburger-inner,
+[data-theme="light"] .hamburger .hamburger-inner,
+[data-theme="light"] .hamburger .hamburger-inner:before,
+[data-theme="light"] .hamburger .hamburger-inner:after {
+    background: var(--text-dark) !important; /* use header/background dark text color */
+}
+
+[data-theme="dark"] .main-header .hamburger,
+[data-theme="dark"] .hamburger {
+    border-color: rgba(255,255,255,0.12) !important; /* light border in dark mode */
+    background: transparent !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .main-header .hamburger .hamburger-inner,
+[data-theme="dark"] .hamburger .hamburger-inner,
+[data-theme="dark"] .hamburger .hamburger-inner:before,
+[data-theme="dark"] .hamburger .hamburger-inner:after {
+    background: var(--text-light) !important;
+}
+
+/* Remove any unexpected black outlines near the hamburger when open/focused */
+.hamburger.is-open, .hamburger:focus { box-shadow: none !important; }
+
+/* Additional overrides to address visual issues reported:
+   - move hamburger inner slightly down on small screens so it doesn't cover other buttons
+   - force inner bar colors to match header/background in light and dark themes
+   - remove unwanted borders around logo/profile images
+   - make high-contrast header truly black and keep search-bar visible
+*/
+@media (max-width: 480px) {
+    .hamburger .hamburger-inner { top: 8px !important; }
+    .hamburger .hamburger-inner:before { top: -5px !important; }
+    .hamburger .hamburger-inner:after { top: 9px !important; }
+}
+
+/* Force the hamburger inner bars to use header/background colors in light mode */
+header.main-header[data-theme="light"] .hamburger .hamburger-inner,
+header.main-header[data-theme="light"] .hamburger .hamburger-inner:before,
+header.main-header[data-theme="light"] .hamburger .hamburger-inner:after,
+[data-theme="light"] .main-header .hamburger .hamburger-inner,
+[data-theme="light"] .hamburger .hamburger-inner { 
+    background: var(--bg-gradient-start) !important;
+}
+
+/* Remove border and black outlines in light mode for the hamburger */
+[data-theme="light"] .hamburger { border: none !important; }
+
+/* Dark theme: ensure hamburger bars are light and no black borders */
+[data-theme="dark"] .hamburger { border: none !important; }
+[data-theme="dark"] .hamburger .hamburger-inner,
+[data-theme="dark"] .hamburger .hamburger-inner:before,
+[data-theme="dark"] .hamburger .hamburger-inner:after {
+    background: var(--text-light) !important;
+}
+
+/* Remove borders/shadows around logos and profile images globally */
+.main-header .logo, .profile-photo, .profile-photo img, .profile-avatar, .profile-avatar img {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* High contrast adjustments: make header black in both themes and keep search-bar visible */
+.a11y-high-contrast .main-header, html.a11y-high-contrast .main-header {
+    background: #000 !important;
+    color: #fff !important;
+    border-bottom: 0 !important;
+}
+.a11y-high-contrast .search-bar, html.a11y-high-contrast .search-bar {
+    background: #111 !important;
+    border: 2px solid #fff !important;
+}
+.a11y-high-contrast .search-bar input { color: #fff !important; background: transparent !important; }
+
+/* Force hamburger inner bars color in light theme to the requested hex */
+[data-theme="light"] .hamburger .hamburger-inner,
+[data-theme="light"] .hamburger .hamburger-inner:before,
+[data-theme="light"] .hamburger .hamburger-inner:after,
+header.main-header[data-theme="light"] .hamburger .hamburger-inner,
+header.main-header[data-theme="light"] .hamburger .hamburger-inner:before,
+header.main-header[data-theme="light"] .hamburger .hamburger-inner:after {
+    background: #F0E1B8 !important; /* explicitly requested color */
+}
+
+/* Stronger, high-specificity override for browsers or cached CSS that still show old color */
+html[data-theme="light"] body .main-header .hamburger .hamburger-inner,
+html[data-theme="light"] body .main-header .hamburger .hamburger-inner:before,
+html[data-theme="light"] body .main-header .hamburger .hamburger-inner:after,
+[data-theme="light"] .main-header .hamburger .hamburger-inner,
+[data-theme="light"] .main-header .hamburger .hamburger-inner:before,
+[data-theme="light"] .main-header .hamburger .hamburger-inner:after {
+    background: #F0E1B8 !important;
+}
+
+/* High-contrast: ensure dark theme also removes any leftover borders and makes text readable */
+.a11y-high-contrast {
+    --text-light: #ffffff !important;
+    --text-medium: #d1d5db !important;
+    --text-dark: #e6e6e6 !important;
+    --bg: #000000 !important;
+}
+.a11y-high-contrast body, .a11y-high-contrast html {
+    background: var(--bg) !important;
+    color: var(--text-light) !important;
+}
+
+/* Remove borders/shadows around images in high contrast (both themes) */
+.a11y-high-contrast .main-header .logo,
+.a11y-high-contrast .profile-photo,
+.a11y-high-contrast .profile-avatar,
+.a11y-high-contrast img,
+.a11y-high-contrast svg {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* Improve legibility of common text elements in high contrast */
+.a11y-high-contrast .main-nav a,
+.a11y-high-contrast .main-content,
+.a11y-high-contrast .profile-name,
+.a11y-high-contrast .profile-name-large,
+.a11y-high-contrast .welcome-title,
+.a11y-high-contrast .card-description,
+.a11y-high-contrast p,
+.a11y-high-contrast li,
+.a11y-high-contrast span {
+    color: var(--text-light) !important;
+}
+
+/* High-contrast links: saffron with underline for visibility */
+.a11y-high-contrast a { color: var(--saffron) !important; text-decoration: underline !important; background: transparent !important; }
+
+/* Make headings and important labels golden in high contrast for stronger emphasis */
+.a11y-high-contrast h1,
+.a11y-high-contrast h2,
+.a11y-high-contrast h3,
+.a11y-high-contrast h4,
+.a11y-high-contrast h5,
+.a11y-high-contrast h6,
+.a11y-high-contrast .main-nav a,
+.a11y-high-contrast .logo-title,
+.a11y-high-contrast .profile-name,
+.a11y-high-contrast .profile-name-large,
+.a11y-high-contrast .welcome-title {
+    color: var(--saffron) !important;
+}
+
+/* White line under header to separate header from background in high contrast */
+.a11y-high-contrast .main-header,
+html.a11y-high-contrast .main-header {
+    border-bottom: 2px solid #fff !important;
+}
+
+
+
 
 /* ==========================================================
    FORÇAR LAYOUT VERTICAL PARA CARDS DA PÁGINA INICIAL
@@ -2330,3 +3009,66 @@ body.colorblind-tritanopia { filter: url(#tritanopia-filter) !important; }
       word-break: break-word !important;
   }
 }
+
+/* --- Fixes requested: prevent horizontal drag, improve mobile panel and dark inputs --- */
+
+/* Extra guard against horizontal scrolling introduced by wide children */
+html, body, #root {
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
+/* Mobile nav panel adjustments: remove wide side gutters, reduce top gap
+   so the panel sits closer under the header and no different side color is visible. */
+@media (max-width: 768px) {
+    .mobile-nav-overlay {
+        left: 0;
+        right: 0;
+        width: 100%;
+        padding: 8px; /* keep small padding but avoid large top gap */
+        background: rgba(0,0,0,0.96); /* fallback dark overlay */
+    }
+    /* Make overlay color explicit per theme so there are no visible side stripes */
+    [data-theme="light"] .mobile-nav-overlay { background: rgba(240,225,187,0.96); }
+    [data-theme="dark"] .mobile-nav-overlay { background: rgba(6,8,12,0.96); }
+
+    .mobile-nav-overlay .mobile-nav-panel {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border-radius: 0;
+        padding: 10px 12px;
+        box-shadow: none;
+        background: none; /* keep panel visually consistent with overlay */
+        background-clip: padding-box;
+    }
+}
+
+/* Improve readability of form labels/placeholders/inputs in dark theme (login/registro) */
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .input-label {
+    color: #E7F4FF !important; /* clear, slightly-blueish white */
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    color: #E7F4FF !important;
+    background-color: rgba(255,255,255,0.02) !important;
+    border-color: rgba(231,244,255,0.08) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: rgba(231,244,255,0.56) !important; /* visible but softer */
+    opacity: 1 !important;
+}
+
+/* If any page element is causing horizontal overflow, clip it on mobile */
+@media (max-width: 1024px) {
+    .main-content, .page, .page-wrapper, .selection-page {
+        overflow-x: hidden !important;
+    }
+}
+

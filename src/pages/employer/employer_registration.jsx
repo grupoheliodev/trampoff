@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/imgs/logo_escuro.png';
-import logoLight from '../../assets/imgs/logo_claro.png';
+import logo from '../../assets/imgs/logojovialescuro.png';
+import logoLight from '../../assets/imgs/logojovialclara.png';
 import ThemeAwareImage from '../../components/ThemeAwareImage';
 
 const EmployerRegistration = () => {
