@@ -30,6 +30,7 @@ import ProfileSetup from './pages/ProfileSetup.jsx';
 import SearchResults from './pages/SearchResults.jsx';
 import JobDetail from './pages/JobDetail.jsx';
 import ProjectDetail from './pages/ProjectDetail.jsx';
+import SchoolEvents from './pages/SchoolEvents.jsx';
 
 const AppRoutes = () => {
   return (
@@ -58,6 +59,7 @@ const AppRoutes = () => {
       <Route path="/employer/profile" element={<EmployerProfile />} />
       <Route path="/employer/settings" element={<EmployerSettings />} />
       <Route path="/projects/:id" element={<ProjectPage />} />
+      <Route path="/school-events" element={<SchoolEvents />} />
       <Route path="/profile/setup" element={<ProfileSetup />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/jobs/:id" element={<JobDetail />} />

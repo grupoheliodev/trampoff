@@ -8,13 +8,22 @@ import ThemeAwareImage from '../../components/ThemeAwareImage';
 const EmployerRegistration = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
-    const [formData, setFormData] = useState({ company_name: '', email: '', password: '', phone: '', cnpj: '', description: '' });
+    const [formData, setFormData] = useState({ company_name: '', email: '', password: '', phone: '', cnpj: '', description: '', school: '' });
     const [cnpjError, setCnpjError] = useState('');
     const [phoneError, setPhoneError] = useState('');
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    };
+
+    const validatePassword = (pwd) => {
+        if (!pwd || pwd.length < 8) return 'Senha deve ter ao menos 8 caracteres';
+        if (!/[A-Z]/.test(pwd)) return 'Inclua pelo menos 1 letra maiúscula';
+        if (!/[a-z]/.test(pwd)) return 'Inclua pelo menos 1 letra minúscula';
+        if (!/[0-9]/.test(pwd)) return 'Inclua pelo menos 1 número';
+        if (!/[!@#\$%\^&\*(),.?":{}|<>\-\[\]\/\\]/.test(pwd)) return 'Inclua pelo menos 1 caractere especial';
+        return '';
     };
 
     const onlyDigits = (v) => (v || '').toString().replace(/\D/g, '');
@@ -116,9 +125,14 @@ const EmployerRegistration = () => {
             setPhoneError('Telefone inválido');
             return;
         }
-        // validar confirmação de senha
+        // password strength
+        const pwdErr = validatePassword(formData.password);
         if (!formData.password) {
             setRegistrationError('Senha obrigatória');
+            return;
+        }
+        if (pwdErr) {
+            setRegistrationError(pwdErr);
             return;
         }
 
@@ -130,7 +144,8 @@ const EmployerRegistration = () => {
                 companyName: formData.company_name,
                 phone: formData.phone,
                 cnpj: formData.cnpj,
-                description: formData.description
+                description: formData.description,
+                school: formData.school
             }, 'contratante');
 
             // Após cadastro bem-sucedido, vai direto para o home do empregador

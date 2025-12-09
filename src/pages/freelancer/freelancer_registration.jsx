@@ -8,7 +8,7 @@ import ThemeAwareImage from '../../components/ThemeAwareImage';
 const FreelancerRegistration = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
-    const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', portfolio: '', cad: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '', portfolio: '', cad: '', school: '', studentId: '', isHighSchoolStudent: false });
     const [cadError, setCadError] = useState('');
     const [phoneError, setPhoneError] = useState('');
     // Etapa de confirmação removida – cadastro direto
@@ -94,8 +94,17 @@ const FreelancerRegistration = () => {
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    };
+
+    const validatePassword = (pwd) => {
+        if (!pwd || pwd.length < 8) return 'Senha deve ter ao menos 8 caracteres';
+        if (!/[A-Z]/.test(pwd)) return 'Inclua pelo menos 1 letra maiúscula';
+        if (!/[a-z]/.test(pwd)) return 'Inclua pelo menos 1 letra minúscula';
+        if (!/[0-9]/.test(pwd)) return 'Inclua pelo menos 1 número';
+        if (!/[!@#\$%\^&\*(),.?":{}|<>\-\[\]\/\\]/.test(pwd)) return 'Inclua pelo menos 1 caractere especial';
+        return '';
     };
 
     const onlyDigitsPhone = (v) => (v || '').toString().replace(/\D/g, '');
@@ -150,12 +159,28 @@ const FreelancerRegistration = () => {
             setPhoneError('Telefone inválido');
             return;
         }
+        // password strength
+        const pwdErr = validatePassword(formData.password);
         if (!formData.password) {
             setRegistrationError('Senha obrigatória');
             return;
         }
+        if (pwdErr) {
+            setRegistrationError(pwdErr);
+            return;
+        }
+
+        // enforce high-school-only registration
+        if (!formData.isHighSchoolStudent) {
+            setRegistrationError('Apenas alunos do Ensino Médio podem se cadastrar. Marque que você é aluno do Ensino Médio.');
+            return;
+        }
+        if (!formData.school || !formData.studentId) {
+            setRegistrationError('Informe sua escola e número de identificação escolar.');
+            return;
+        }
         try {
-            await register({ name: formData.name, email: formData.email, password: formData.password, phone: formData.phone, cad: formData.cad, portfolio: formData.portfolio }, 'freelancer');
+            await register({ name: formData.name, email: formData.email, password: formData.password, phone: formData.phone, cad: formData.cad, portfolio: formData.portfolio, school: formData.school, studentId: formData.studentId, isHighSchoolStudent: formData.isHighSchoolStudent }, 'freelancer');
             navigate('/profile/setup');
             setInfoMessage('Cadastro realizado! E-mail verificado automaticamente.');
         } catch (error) {
@@ -207,6 +232,7 @@ const FreelancerRegistration = () => {
                     <div className="form-group">
                         <label htmlFor="password">Senha</label>
                         <input type="password" id="password" name="password" placeholder="Digite sua senha" onChange={handleChange} required />
+                        <small style={{ color: '#ccc', display: 'block', marginTop: 6 }}>Senha mínima 8 caracteres, 1 maiúscula, 1 minúscula, 1 número e 1 símbolo.</small>
                     </div>
                     {/* Campo de confirmação de senha removido */}
                     <div className="form-group">
@@ -217,6 +243,20 @@ const FreelancerRegistration = () => {
                     <div className="form-group">
                         <label htmlFor="portfolio">Link do Portfólio</label>
                         <input type="url" id="portfolio" name="portfolio" onChange={handleChange} />
+                    </div>
+
+                    <div className="form-group">
+                        <label>
+                            <input type="checkbox" name="isHighSchoolStudent" checked={formData.isHighSchoolStudent} onChange={handleChange} /> Sou aluno do Ensino Médio
+                        </label>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="school">Escola</label>
+                        <input type="text" id="school" name="school" value={formData.school} onChange={handleChange} placeholder="Nome da sua escola" />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="studentId">Número de Identificação Escolar</label>
+                        <input type="text" id="studentId" name="studentId" value={formData.studentId} onChange={handleChange} placeholder="ID escolar (matrícula)" />
                     </div>
 
                     <button type="submit" className="registration-button" disabled={!!cadError}>

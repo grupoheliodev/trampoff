@@ -18,11 +18,13 @@ const Header = ({ userType, username, onProfileClick, profilePicture }) => {
         { path: '/freelancer/jobs', label: 'Trabalhos Disponíveis' },
         { path: '/freelancer/contracts', label: 'Meus Contratos' },
         { path: '/freelancer/messages', label: 'Mensagens' },
+        { path: '/school-events', label: 'Eventos Escolares' },
     ] : [
         { path: '/employer/home', label: 'Início' },
         { path: '/employer/workers', label: 'Trabalhadores Disponíveis' },
         { path: '/employer/contracts', label: 'Meus Contratos' },
         { path: '/employer/messages', label: 'Mensagens' },
+        { path: '/school-events', label: 'Eventos Escolares' },
     ];
     
     const profileImg = profilePicture || user?.photo || (isFreelancer ? perfilFreelancer : perfilEmployer);
