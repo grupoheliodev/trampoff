@@ -1200,6 +1200,8 @@ input:focus, textarea:focus {
     max-width: 100% !important;
     height: auto !important;
     object-fit: contain !important;
+    display: block;
+    margin: 0 auto 1.5rem; /* centraliza horizontalmente e afasta do título */
 }
 
 /* Aumentar logos exibidas dentro do conteúdo principal (páginas freelancer/employer)
